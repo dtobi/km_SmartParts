@@ -28,8 +28,9 @@ using KSP.IO;
 
 namespace KM_Lib
 {
-    public class KM_Timer : PartModule 
+    public class KM_Timer : PartModule
     {
+        #region Fields
 
         [KSPField (isPersistant = false, guiActive = true, guiActiveEditor = true, guiName = "Group")]
         public String groupName = "Stage";
@@ -49,33 +50,27 @@ namespace KM_Lib
         [KSPField(isPersistant = true, guiActive = true, guiName = "Remaining Time", guiFormat = "#0.##")]
         private double remainingTime = 0;
 
+        #endregion
+        
+
+        #region Events
+
         [KSPAction("Start Countdown")]
         public void activateTimerCustom (KSPActionParam param)
         {
-            activateTimer (triggerDelay);
+            this.part.force_activate();
         }
 
         [KSPEvent(guiName = "Start Countdown", guiActive = true)]
         public void activateTimer2 ()
         {
-            activateTimer (triggerDelay);
+            this.part.force_activate();
         }
 
-        [KSPEvent(guiName = "Reset", guiActive = true)]
-        public void resetTimer ()
-        {   triggerTime   = 0;
-            remainingTime = 0;
-            Utility.switchLight (this.part, "light-go", true);             
-            Utility.playAnimationSetToPosition (this.part, "glow", 1);
-        }
+        #endregion
 
-        public void activateTimer(float delay)
-        {
-            triggerTime = Time.fixedTime;
-            triggerDelay = delay;
-            remainingTime = triggerDelay;
-            print ("Activating Timer: " + triggerDelay);
-        }
+
+        #region Overrides
 
         public override void OnStart(StartState state)
         {
@@ -86,44 +81,64 @@ namespace KM_Lib
                 this.part.OnEditorDestroy += OnEditorDestroy;
                 OnEditorAttach();
             }
+            this.part.stagingIcon = "RCS_MODULE";
             part.ActivatesEvenIfDisconnected = true;
-            //this.part.stackIcon.SetIcon(this.part, "Klockheed_Martian/Icons/controller-stage.png", 0, 0);
         }
 
+        public override void OnActive()
+        {
+            triggerTime = Time.fixedTime;
+            remainingTime = triggerDelay;
+            print("Activating Timer: " + triggerDelay);
+        }
 
         public override void OnUpdate()
         {
+            //Watch for changes to the selected group. If any, update display with proper name.
             if (group != lastGroup) {
                 groupName = Utility.KM_dictAGNames [(int)group];
                 lastGroup = group;
             }
+
+            //Check to see if the timer has been dragged in the staging list. If so, reset icon color
+            if (this.part.stackIcon.iconColor == XKCDColors.Red && this.part.inverseStage < Staging.CurrentStage) {
+                this.part.stackIcon.SetIconColor(XKCDColors.White);
+            }
+
+            //If the timer has been activated, start the countdown, activate the model's LED, and change the icon color
             if (triggerTime > 0) {
                 remainingTime = triggerTime + triggerDelay - Time.time;
+                Utility.switchLight(this.part, "light-go", true);
+                Utility.playAnimationSetToPosition(this.part, "glow", 1);
+                this.part.stackIcon.SetIconColor(XKCDColors.BrightYellow);
+                //Once the timer hits 0 activate the stage/AG, disable the model's LED, and change the icon color
                 if (remainingTime < 0) {
                     print ("Stage:"+Utility.KM_dictAGNames [(int)group]);
                     Utility.fireEvent (this.part, (int)group);
-                    Utility.switchLight (this.part, "light-go", true);             
-                    Utility.playAnimationSetToPosition (this.part, "glow", 1);
+                    Utility.switchLight(this.part, "light-go", false);
+                    Utility.playAnimationSetToPosition(this.part, "glow", 0);
+                    this.part.stackIcon.SetIconColor(XKCDColors.Red);
                     remainingTime = 0;
                     triggerTime = 0;
                 }
             }
         }
-        private void OnEditorAttach()
-        {
+
+        #endregion
+
+
+        #region Methods
+
+        private void OnEditorAttach() {
             RenderingManager.AddToPostDrawQueue(99, updateEditor);
         }
 
-        private void OnEditorDetach()
-        {            
-
+        private void OnEditorDetach() {            
             RenderingManager.RemoveFromPostDrawQueue(99, updateEditor);
         }
 
-        private void OnEditorDestroy()
-        {
+        private void OnEditorDestroy() {
             RenderingManager.RemoveFromPostDrawQueue(99, updateEditor);
-
         }
 
         private void updateEditor(){
@@ -133,6 +148,8 @@ namespace KM_Lib
             }
 
         }
+
+        #endregion
     }
 }
 
