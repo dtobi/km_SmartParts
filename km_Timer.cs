@@ -1,5 +1,5 @@
 /*
- * Author: dtobi
+ * Author: dtobi, Firov
  * This work is shared under CC BY-NC-ND 3.0 license.
  * Non commercial, no derivatives, attribution if shared unmodified.
  * You may distribute this code and the compiled .dll as is.
@@ -55,20 +55,17 @@ namespace KM_Lib
 
         #region Events
 
-        [KSPAction("Start Countdown")]
-        public void activateTimerCustom (KSPActionParam param)
-        {
-            this.part.force_activate();
-        }
-
         [KSPEvent(guiName = "Start Countdown", guiActive = true)]
-        public void activateTimer2 ()
+        public void activateTimer ()
         {
             this.part.force_activate();
         }
 
-
-
+        [KSPAction("Start Countdown")]
+        public void activateTimerAG (KSPActionParam param)
+        {
+            this.part.force_activate();
+        }
 
         [KSPEvent(guiName = "Reset", guiActive = true)]
         public void resetTimer ()
