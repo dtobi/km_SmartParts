@@ -67,8 +67,18 @@ namespace KM_Lib
             this.part.force_activate();
         }
 
-        #endregion
 
+
+
+        [KSPEvent(guiName = "Reset", guiActive = true)]
+        public void resetTimer ()
+        {   triggerTime   = 0;
+            remainingTime = 0;
+            Utility.switchLight (this.part, "light-go", false);
+            Utility.playAnimationSetToPosition (this.part, "glow", 0);
+        }
+
+        #endregion
 
         #region Overrides
 
