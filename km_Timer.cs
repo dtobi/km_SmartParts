@@ -51,28 +51,37 @@ namespace KM_Lib
         private double remainingTime = 0;
 
         #endregion
-        
+
+
+        #region Variables
+
+        private Boolean armed = true;
+
+        #endregion
+
 
         #region Events
 
         [KSPEvent(guiName = "Start Countdown", guiActive = true)]
-        public void activateTimer ()
-        {
-            this.part.force_activate();
+        public void activateTimer () {
+                this.part.force_activate();
         }
 
         [KSPAction("Start Countdown")]
-        public void activateTimerAG (KSPActionParam param)
+        public void activateTimerAG(KSPActionParam param)
         {
-            this.part.force_activate();
+                this.part.force_activate();
         }
 
         [KSPEvent(guiName = "Reset", guiActive = true)]
-        public void resetTimer ()
-        {   triggerTime   = 0;
-            remainingTime = 0;
-            Utility.switchLight (this.part, "light-go", false);
-            Utility.playAnimationSetToPosition (this.part, "glow", 0);
+        public void resetTimer () {
+            reset();
+        }
+
+        [KSPAction("Reset")]
+        public void resetTimerAG(KSPActionParam param)
+        {
+            reset();
         }
 
         #endregion
@@ -94,9 +103,10 @@ namespace KM_Lib
 
         public override void OnActive()
         {
-            triggerTime = Time.fixedTime;
-            remainingTime = triggerDelay;
-            print("Activating Timer: " + triggerDelay);
+            if (armed == true) {
+                triggerTime = Time.fixedTime;
+                print("Activating Timer: " + triggerDelay);
+            }
         }
 
         public override void OnUpdate()
@@ -108,25 +118,26 @@ namespace KM_Lib
             }
 
             //Check to see if the timer has been dragged in the staging list. If so, reset icon color
-            if (this.part.stackIcon.iconColor == XKCDColors.Red && this.part.inverseStage < Staging.CurrentStage) {
-                this.part.stackIcon.SetIconColor(XKCDColors.White);
+            if (armed == false && this.part.inverseStage < Staging.CurrentStage) {
+                reset();
             }
 
             //If the timer has been activated, start the countdown, activate the model's LED, and change the icon color
-            if (triggerTime > 0) {
+            if (triggerTime > 0 && armed == true) {
                 remainingTime = triggerTime + triggerDelay - Time.time;
                 Utility.switchLight(this.part, "light-go", true);
                 Utility.playAnimationSetToPosition(this.part, "glow", 1);
                 this.part.stackIcon.SetIconColor(XKCDColors.BrightYellow);
+
                 //Once the timer hits 0 activate the stage/AG, disable the model's LED, and change the icon color
                 if (remainingTime < 0) {
                     print ("Stage:"+Utility.KM_dictAGNames [(int)group]);
                     Utility.fireEvent (this.part, (int)group);
-                    Utility.switchLight(this.part, "light-go", false);
-                    Utility.playAnimationSetToPosition(this.part, "glow", 0);
                     this.part.stackIcon.SetIconColor(XKCDColors.Red);
-                    remainingTime = 0;
                     triggerTime = 0;
+                    remainingTime = 0;
+                    //Disable timer until reset
+                    armed = false;
                 }
             }
         }
@@ -135,6 +146,19 @@ namespace KM_Lib
 
 
         #region Methods
+
+        private void reset() {
+            //Reset trigger and remaining time to 0
+            triggerTime = 0;
+            remainingTime = 0;
+            //Switch off model lights
+            Utility.switchLight(this.part, "light-go", false);
+            Utility.playAnimationSetToPosition(this.part, "glow", 0);
+            //Reset icon color to white
+            this.part.stackIcon.SetIconColor(XKCDColors.White);
+            //Reset armed variable
+            armed = true;
+        }
 
         private void OnEditorAttach() {
             RenderingManager.AddToPostDrawQueue(99, updateEditor);
