@@ -64,22 +64,10 @@ namespace KM_Lib
             setValve (!isOpen); 
         }
 
-        [KSPEvent(guiName = "Open", guiActive = true, guiActiveEditor = false)]
-        public void openValve ()
-        {   
-            setValve (true); 
-        }
-
         [KSPAction("Open")]
         public void openValveAG (KSPActionParam param)
         {   
             setValve (true); 
-        }
-
-        [KSPEvent(guiName = "Close", guiActive = true, guiActiveEditor = false)]
-        public void closeValve ()
-        {   
-            setValve (false); 
         }
 
         [KSPAction("Close")]
@@ -102,8 +90,8 @@ namespace KM_Lib
             if (isOpen) {
                 valveEffect.localVelocity.y = maxSpeedY * force / 100;
                 float receivedRessource = 0;
-                if (part.parent.Resources ["LiquidFuel"] != null)     receivedRessource += this.part.RequestResource("LiquidFuel", force*TimeWarp.fixedDeltaTime);
-                if (part.parent.Resources ["Oxidizer"] != null)       receivedRessource += this.part.RequestResource("Oxidizer", force*TimeWarp.fixedDeltaTime);
+                if (part.parent.Resources ["LiquidFuel"] != null)     receivedRessource += this.part.RequestResource("LiquidFuel", force*TimeWarp.fixedDeltaTime*0.9f);
+                if (part.parent.Resources ["Oxidizer"] != null)       receivedRessource += this.part.RequestResource("Oxidizer", force*TimeWarp.fixedDeltaTime*1.1f);
                 if (part.parent.Resources ["MonoPropellant"] != null) receivedRessource += this.part.RequestResource("MonoPropellant", force*TimeWarp.fixedDeltaTime);
                 if (receivedRessource == 0)
                     setValve (false);
