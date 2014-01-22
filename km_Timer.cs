@@ -35,7 +35,7 @@ namespace KM_Lib
         [KSPField (isPersistant = false, guiActive = true, guiActiveEditor = true, guiName = "Group")]
         public String groupName = "Stage";
 
-        [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "Select") , UI_FloatRange(minValue = 0f, maxValue = 15f, stepIncrement = 1f)]
+        [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "Select") , UI_FloatRange(minValue = 0f, maxValue = 16f, stepIncrement = 1f)]
         public float group = 0;
         private float lastGroup = 0;
 

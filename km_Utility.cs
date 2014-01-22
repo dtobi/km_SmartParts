@@ -72,7 +72,7 @@ namespace KM_Lib
             {12, KSPActionGroup.RCS},
             {13, KSPActionGroup.SAS},
             {14, KSPActionGroup.Brakes},
-            {15, KSPActionGroup.Abort},
+            {15, KSPActionGroup.Abort}
         };
         public static Dictionary<int, String> KM_dictAGNames = new Dictionary<int, String>
         {
@@ -92,8 +92,9 @@ namespace KM_Lib
             {13, "SAS"},
             {14, "Brakes"},
             {15, "Abort"},
+            {16, "Beep"},
         };
-        public static int maxEvent = 16;
+        public static int maxEvent = 17;
 
 
 
@@ -227,10 +228,13 @@ namespace KM_Lib
             if (eventID == 0) {
                 MonoBehaviour.print ("Fire Stage from part " + p);
                 fireNextNonEmptyStage (p.vessel);
+                return;
+            } else if (eventID == 16) {
+                playAudio (p, "Klockheed_Martian/Sounds/beep");
+                return;
             } else if (eventID > 0 && eventID <=maxEvent){
                 MonoBehaviour.print ("Fire Event "+ KM_dictAGNames[eventID]+" from part " + p);
-                p.vessel.ActionGroups.ToggleGroup (KM_dictAG[eventID]);
-                //p.vessel.ActionGroups.SetGroup (KM_dictAG[eventID], true);        
+                p.vessel.ActionGroups.ToggleGroup (KM_dictAG[eventID]);   
             }
         }
 	}
