@@ -110,7 +110,6 @@ namespace KM_Lib
 
         private static void traverseChildren(Part p, int nextStage, ref List<Part> resultList)
         {
-            MonoBehaviour.print ("Check:" + p);
             if (p.inverseStage >= nextStage) {
                 resultList.Add (p);
             }
@@ -149,7 +148,6 @@ namespace KM_Lib
                     highestChildStage = childStage;
                 }
             }
-            MonoBehaviour. print ("Highest Child Stage:" + highestChildStage);
             return highestChildStage;
         }
 
