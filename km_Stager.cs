@@ -41,6 +41,8 @@ namespace KM_Lib
             UI_Toggle(disabledText = "Disabled", enabledText = "Enabled")]
         public bool isActive = true;
 
+
+
         [KSPAction("Activate Detection")]
         public void doActivateAG(KSPActionParam param)
         {
@@ -54,6 +56,12 @@ namespace KM_Lib
         }
 
         private Part observedPart = null;
+
+        private double lastFill = 0; // save the last fill level when the tank drains
+
+        private int executionLimiter = 0;
+
+        private int executionFrequency = 3; // the update loop will only execute every executionFrequency'th time
 
         private bool checkPart(Part p){
         
@@ -83,34 +91,50 @@ namespace KM_Lib
                 print ("KM Stager: Set observed part to " + observedPart + "Active is: " + isActive);
             }
             print("KM Stager Started");
+            base.OnStart (state);
         }
 
         public override void OnUpdate()
         {
-            if (group != lastGroup) {
-                groupName = Utility.KM_dictAGNames [(int)group];
-                lastGroup = group;
-            }
+            if(executionLimiter++ % executionFrequency == 0){
 
-            if(!isActive){
-                Utility.switchLight (this.part, "light-go", false);
-                Utility.playAnimationSetToPosition (this.part, "glow", 0);
-                return;
-            }
+                if (group != lastGroup) {
+                    groupName = Utility.KM_dictAGNames [(int)group];
+                    lastGroup = group;
+                }
 
-            if (isActive && observedPart != null) {
-                if (observedPart.Resources ["LiquidFuel"] != null && observedPart.Resources ["LiquidFuel"].amount < 1 ||
+                if(!isActive){
+                    Utility.switchLight (this.part, "light-go", false);
+                    Utility.playAnimationSetToPosition (this.part, "glow", 0);
+                    return;
+                }
+
+                if (isActive && observedPart != null) {
+                    if (observedPart.Resources ["LiquidFuel"] != null && observedPart.Resources ["LiquidFuel"].amount < 1 ||
                     observedPart.Resources ["SolidFuel"] != null && observedPart.Resources ["SolidFuel"].amount < 1 ||
-                    observedPart.Resources ["ElectricCharge"] != null && observedPart.Resources ["ElectricCharge"].amount < 0.1) {
-                    if (this.part.name == "km_smart_fuel") {
-                        Utility.switchLight (this.part, "light-go", true);             
-                        Utility.playAnimationSetToPosition (this.part, "glow", 1);
-                    } else {
-                        print ("Not animating staging for part:" + this.part.name); 
+                    observedPart.Resources ["ElectricCharge"] != null && observedPart.Resources ["ElectricCharge"].amount < 1) {
+                        if (this.part.name == "km_smart_fuel") {
+                            Utility.switchLight (this.part, "light-go", true);             
+                            Utility.playAnimationSetToPosition (this.part, "glow", 1);
+                        } else {
+                            print ("Not animating staging for part:" + this.part.name); 
+                        }
+
+                        // determine if the tank still drains;
+                        double currentFill = 0;
+                        currentFill += (observedPart.Resources ["LiquidFuel"] != null ? observedPart.Resources ["LiquidFuel"].amount : 0);
+                        currentFill += (observedPart.Resources ["SolidFuel"] != null ? observedPart.Resources ["SolidFuel"].amount : 0);
+                        currentFill += (observedPart.Resources ["ElectricCharge"] != null ? observedPart.Resources ["ElectricCharge"].amount : 0);
+                        print ("LastFill: " + lastFill + "CurrentFill: " + currentFill);
+                        // only if the tank level stays the same
+                        if (currentFill == 0 || lastFill == currentFill) {
+                            print ("EQUAL LastFill: " + lastFill + "CurrentFill: " + currentFill);
+                            Utility.fireEvent (this.part, (int)group);
+                            print ("Tank empty. Fire event");
+                            isActive = false;
+                        }
+                        lastFill = currentFill;
                     }
-                    Utility.fireEvent (this.part, (int)group);
-                    print ("Tank empty. Fire event");
-                    isActive = false;
                 }
            } 
 
