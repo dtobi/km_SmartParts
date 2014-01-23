@@ -47,30 +47,35 @@ namespace KM_Lib
         [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "Delay", guiUnits = "s"), UI_FloatRange(minValue = 0.5f, maxValue = 20f, stepIncrement = 0.5f)]
         private float triggerDelay = 5;
 
-        [KSPField(isPersistant = true, guiActive = true, guiName = "Remaining Time", guiFormat = "#0.##")]
+        [KSPField(isPersistant = true, guiActive = true, guiName = "Remaining Time", guiFormat = "F2")]
         private double remainingTime = 0;
 
-        #endregion
-
-
-        #region Variables
-
-        private Boolean armed = true;
+        [KSPField(isPersistant = true)]
+        private Boolean allowStage = true;
 
         #endregion
-
+        
 
         #region Events
+        
+        [KSPEvent(guiActive = false, guiActiveEditor = false, guiName = "Enable Staging")]
+        public void activateStaging() {
+           enableStaging();
+        }
+
+        [KSPEvent(guiActive = false, guiActiveEditor = false, guiName = "Disable Staging")]
+        public void deactivateStaging() {
+            disableStaging();
+        }
 
         [KSPEvent(guiName = "Start Countdown", guiActive = true)]
         public void activateTimer () {
-                this.part.force_activate();
+            setTimer();
         }
 
         [KSPAction("Start Countdown")]
-        public void activateTimerAG(KSPActionParam param)
-        {
-                this.part.force_activate();
+        public void activateTimerAG(KSPActionParam param) {
+            setTimer();
         }
 
         [KSPEvent(guiName = "Reset", guiActive = true)]
@@ -86,6 +91,14 @@ namespace KM_Lib
 
         #endregion
 
+
+        #region Variables
+
+        private Boolean armed = true;
+
+        #endregion
+
+
         #region Overrides
 
         public override void OnStart(StartState state)
@@ -97,15 +110,22 @@ namespace KM_Lib
                 this.part.OnEditorDestroy += OnEditorDestroy;
                 OnEditorAttach();
             }
-            this.part.stagingIcon = "RCS_MODULE";
+            if (allowStage) {
+                Events["activateStaging"].guiActiveEditor = false;
+                Events["deactivateStaging"].guiActiveEditor = true;
+            }
+            else {
+                Invoke("disableStaging", 0.25f);
+            }
+            GameEvents.onVesselChange.Add(onVesselChange);
             part.ActivatesEvenIfDisconnected = true;
         }
 
         public override void OnActive()
-        {
-            if (armed == true) {
-                triggerTime = Time.fixedTime;
-                print("Activating Timer: " + triggerDelay);
+        {            
+            //If staging enabled, set timer
+            if(allowStage) {
+                setTimer();
             }
         }
 
@@ -118,7 +138,7 @@ namespace KM_Lib
             }
 
             //Check to see if the timer has been dragged in the staging list. If so, reset icon color
-            if (armed == false && this.part.inverseStage < Staging.CurrentStage) {
+            if (allowStage && armed == false && this.part.inverseStage < Staging.CurrentStage) {
                 reset();
             }
 
@@ -146,6 +166,45 @@ namespace KM_Lib
 
 
         #region Methods
+
+        public void onVesselChange(Vessel newVessel) {
+            if (newVessel == this.vessel && !allowStage) {
+                Invoke("disableStaging", 0.25f);
+            }
+        }
+
+        private void enableStaging() {
+                part.stackIcon.CreateIcon();
+                Staging.SortIcons();
+                allowStage = true;
+
+                if(HighLogic.LoadedSceneIsEditor) {
+                    //Toggle button visibility so currently inactive mode's button is visible
+                    Events["activateStaging"].guiActiveEditor = false;
+                    Events["deactivateStaging"].guiActiveEditor = true;
+                }
+        }
+
+        private void disableStaging() {
+                part.stackIcon.RemoveIcon();
+                Staging.SortIcons();
+                allowStage = false;
+
+                if(HighLogic.LoadedSceneIsEditor) {
+                    //Toggle button visibility so currently inactive mode's button is visible
+                    Events["activateStaging"].guiActiveEditor = true;
+                    Events["deactivateStaging"].guiActiveEditor = false;
+                }
+        }
+
+        private void setTimer() {
+            if (armed == true)
+            {
+                //Set the trigger time, which will be caught in OnUpdate
+                triggerTime = Time.fixedTime;
+                print("Activating Timer: " + triggerDelay);
+                }
+        }
 
         private void reset() {
             //Reset trigger and remaining time to 0
@@ -183,4 +242,3 @@ namespace KM_Lib
         #endregion
     }
 }
-
