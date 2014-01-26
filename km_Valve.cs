@@ -29,6 +29,9 @@ namespace KM_Lib
 {
     public class KM_Valve : PartModule
     {
+
+        private Dictionary<String, double> drainRatio = new Dictionary<String, double> ();
+
         static float maxSpeedY = -1.0f;
         KSPParticleEmitter valveEffect = null;
 
@@ -44,6 +47,26 @@ namespace KM_Lib
             } else {
                 print ("Launch effect not found");
             }
+
+            if (state != StartState.Editor) {
+
+                // determine max amount of resources in parent part
+                double totalResourceAmount = 0;
+                foreach (PartResource resource in part.parent.Resources) {
+                    if (resource.resourceName == "ElectricCharge")
+                        continue;
+                    totalResourceAmount += resource.maxAmount;
+                }
+
+                // determine drain ratios
+                foreach (PartResource resource in part.parent.Resources) {
+                    if (resource.resourceName == "ElectricCharge")
+                        continue;
+                    drainRatio.Add(resource.resourceName, (totalResourceAmount > 0 ? resource.maxAmount / totalResourceAmount : 0));
+                    print ("Valve: Adding ressource:" + resource.resourceName + " DR:" + resource.maxAmount / totalResourceAmount);
+                }
+            }
+
         }
 
         [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "Outlet") , UI_FloatRange(minValue = 0f, maxValue = 100f, stepIncrement = 5f)]
@@ -89,10 +112,12 @@ namespace KM_Lib
         {
             if (isOpen) {
                 valveEffect.localVelocity.y = maxSpeedY * force / 100;
-                float receivedRessource = 0;
-                if (part.parent.Resources ["LiquidFuel"] != null)     receivedRessource += this.part.RequestResource("LiquidFuel", force*TimeWarp.fixedDeltaTime*0.9f);
-                if (part.parent.Resources ["Oxidizer"] != null)       receivedRessource += this.part.RequestResource("Oxidizer", force*TimeWarp.fixedDeltaTime*1.1f);
-                if (part.parent.Resources ["MonoPropellant"] != null) receivedRessource += this.part.RequestResource("MonoPropellant", force*TimeWarp.fixedDeltaTime);
+                double receivedRessource = 0;
+                foreach (PartResource resource in part.parent.Resources) {
+                    if (resource.resourceName == "ElectricCharge")
+                        continue;
+                    receivedRessource += this.part.RequestResource(resource.resourceName, force*TimeWarp.fixedDeltaTime*drainRatio[resource.resourceName]);
+                }
                 if (receivedRessource == 0)
                     setValve (false);
             }

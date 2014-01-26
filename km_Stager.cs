@@ -63,17 +63,15 @@ namespace KM_Lib
 
         private int executionFrequency = 3; // the update loop will only execute every executionFrequency'th time
 
-        private bool checkPart(Part p){
-        
-            return (p.Resources ["LiquidFuel"] != null || p.Resources ["SolidFuel"] != null || p.Resources ["ElectricCharge"] != null);
-
-        }
         private Part getObservedPart(){
 
-            if (checkPart (this.part))
+            if (this.part.Resources.Count > 0) {
+                print ("KM Stager: Monitoring this part");
                 return this.part;
-            if (checkPart (this.part.parent))
+            } else if (this.part.parent.Resources.Count > 0) {
+                print ("KM Stager: Monitoring parent part");
                 return this.part.parent;
+            }
             return null;
         }
 
@@ -110,31 +108,25 @@ namespace KM_Lib
                 }
 
                 if (isActive && observedPart != null) {
-                    if (observedPart.Resources ["LiquidFuel"] != null && observedPart.Resources ["LiquidFuel"].amount < 1 ||
-                    observedPart.Resources ["SolidFuel"] != null && observedPart.Resources ["SolidFuel"].amount < 1 ||
-                    observedPart.Resources ["ElectricCharge"] != null && observedPart.Resources ["ElectricCharge"].amount < 1) {
+
+                    double currentFill = 0;
+                    foreach (PartResource resource in observedPart.Resources) {
+                        currentFill += resource.amount;
+                    }
+                    if (currentFill < 2 && lastFill == currentFill) {
+                        Utility.fireEvent (this.part, (int)group);
+                        print ("Tank empty. Fire event");
+                        isActive = false;
+
                         if (this.part.name == "km_smart_fuel") {
                             Utility.switchLight (this.part, "light-go", true);             
                             Utility.playAnimationSetToPosition (this.part, "glow", 1);
                         } else {
                             print ("Not animating staging for part:" + this.part.name); 
                         }
-
-                        // determine if the tank still drains;
-                        double currentFill = 0;
-                        currentFill += (observedPart.Resources ["LiquidFuel"] != null ? observedPart.Resources ["LiquidFuel"].amount : 0);
-                        currentFill += (observedPart.Resources ["SolidFuel"] != null ? observedPart.Resources ["SolidFuel"].amount : 0);
-                        currentFill += (observedPart.Resources ["ElectricCharge"] != null ? observedPart.Resources ["ElectricCharge"].amount : 0);
-                        print ("LastFill: " + lastFill + "CurrentFill: " + currentFill);
-                        // only if the tank level stays the same
-                        if (currentFill == 0 || lastFill == currentFill) {
-                            print ("EQUAL LastFill: " + lastFill + "CurrentFill: " + currentFill);
-                            Utility.fireEvent (this.part, (int)group);
-                            print ("Tank empty. Fire event");
-                            isActive = false;
-                        }
-                        lastFill = currentFill;
+                    
                     }
+                    lastFill = currentFill;
                 }
            } 
 
