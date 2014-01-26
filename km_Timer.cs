@@ -178,11 +178,9 @@ namespace KM_Lib
                 Staging.SortIcons();
                 allowStage = true;
 
-                if(HighLogic.LoadedSceneIsEditor) {
-                    //Toggle button visibility so currently inactive mode's button is visible
-                    Events["activateStaging"].guiActiveEditor = false;
-                    Events["deactivateStaging"].guiActiveEditor = true;
-                }
+                //Toggle button visibility so currently inactive mode's button is visible
+                Events["activateStaging"].guiActiveEditor = false;
+                Events["deactivateStaging"].guiActiveEditor = true;
         }
 
         private void disableStaging() {
@@ -190,11 +188,9 @@ namespace KM_Lib
                 Staging.SortIcons();
                 allowStage = false;
 
-                if(HighLogic.LoadedSceneIsEditor) {
-                    //Toggle button visibility so currently inactive mode's button is visible
-                    Events["activateStaging"].guiActiveEditor = true;
-                    Events["deactivateStaging"].guiActiveEditor = false;
-                }
+                //Toggle button visibility so currently inactive mode's button is visible
+                Events["activateStaging"].guiActiveEditor = true;
+                Events["deactivateStaging"].guiActiveEditor = false;
         }
 
         private void setTimer() {
