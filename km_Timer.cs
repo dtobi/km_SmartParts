@@ -84,8 +84,7 @@ namespace KM_Lib
         }
 
         [KSPAction("Reset")]
-        public void resetTimerAG(KSPActionParam param)
-        {
+        public void resetTimerAG(KSPActionParam param) {
             reset();
         }
 
@@ -101,10 +100,8 @@ namespace KM_Lib
 
         #region Overrides
 
-        public override void OnStart(StartState state)
-        {
-            if (state == StartState.Editor)
-            {
+        public override void OnStart(StartState state) {
+            if (state == StartState.Editor) {
                 this.part.OnEditorAttach += OnEditorAttach;
                 this.part.OnEditorDetach += OnEditorDetach;
                 this.part.OnEditorDestroy += OnEditorDestroy;
@@ -121,8 +118,7 @@ namespace KM_Lib
             part.ActivatesEvenIfDisconnected = true;
         }
 
-        public override void OnActive()
-        {            
+        public override void OnActive() {            
             //If staging enabled, set timer
             if(allowStage) {
                 setTimer();
@@ -194,8 +190,7 @@ namespace KM_Lib
         }
 
         private void setTimer() {
-            if (armed == true)
-            {
+            if (armed) {
                 //Set the trigger time, which will be caught in OnUpdate
                 triggerTime = Time.fixedTime;
                 print("Activating Timer: " + triggerDelay);
@@ -227,7 +222,7 @@ namespace KM_Lib
             RenderingManager.RemoveFromPostDrawQueue(99, updateEditor);
         }
 
-        private void updateEditor(){
+        private void updateEditor() {
             if (group != lastGroup) {
                 groupName = Utility.KM_dictAGNames [(int)group];
                 lastGroup = group;

@@ -33,9 +33,6 @@ namespace KM_Lib
 
         #region Fields
 
-        [KSPField(isPersistant = false, guiActive = true, guiActiveEditor = true, guiName = "Fire ALT", guiUnits = "m")]
-        public int displayAlt = 0;
-
         [KSPField(isPersistant = false, guiActive = true, guiActiveEditor = true, guiName = "Group")]
         public String groupName = "Stage";
 
@@ -43,12 +40,11 @@ namespace KM_Lib
         public float group = 0;
         private float lastGroup = 0;
 
-        [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "Height"), UI_FloatRange(minValue = -25f, maxValue = 500f, stepIncrement = 5f)]
-        public float targetAlt = 0;
+        [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = false, guiName = "Meters", guiUnits = "m"), UI_FloatRange(minValue = -50f, maxValue = 1000f, stepIncrement = 5f)]
+        public float meterHeight = 0;
 
-        [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = false, guiName = "Units"),
-            UI_Toggle(disabledText = "Meters", enabledText = "Kilometers")]
-        public bool useKilometer = false;
+        [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = false, guiName = "Kilometers", guiUnits = "km"), UI_FloatRange(minValue = -5f, maxValue = 100f, stepIncrement = 1f)]
+        public float kilometerHeight = 0;
 
         [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = false, guiName = "Detection"),
             UI_Toggle(disabledText = "Disabled", enabledText = "Enabled")]
@@ -62,10 +58,25 @@ namespace KM_Lib
             UI_Toggle(disabledText = "False", enabledText = "True")]
         public bool autoReset = false;
 
+        [KSPField(isPersistant = true)]
+        public bool useKilometer = false;
+
         #endregion
 
 
         #region Events
+
+        [KSPEvent(guiActive = false, guiActiveEditor = false, guiName = "Use Kilometers")]
+        public void useKilometers() {
+            useKilometer = true;
+            updateButtons();
+        }
+
+        [KSPEvent(guiActive = false, guiActiveEditor = false, guiName = "Use Meters")]
+        public void useMeters() {
+            useKilometer = false;
+            updateButtons();
+        }
 
         [KSPAction("Activate Detection")]
         public void doActivateAG(KSPActionParam param) {
@@ -92,38 +103,35 @@ namespace KM_Lib
 
         #region Overrides
 
-        public override void OnStart(StartState state)
-        {
-            if (state == StartState.Editor)
-            {
+        public override void OnStart(StartState state) {
+            if (state == StartState.Editor) {
                 this.part.OnEditorAttach += OnEditorAttach;
                 this.part.OnEditorDetach += OnEditorDetach;
                 this.part.OnEditorDestroy += OnEditorDestroy;
                 OnEditorAttach();
             }
+            //Initial button layout
+            updateButtons();
+            //Force activation no matter which stage it's on
+            this.part.force_activate();
             print("KM Altimeter Detector Started");
         }
 
-        public override void OnUpdate()
-        {
+        public override void OnUpdate() {
             //Check to see if the device has been rearmed, if so, deactivate the lights
             if (isArmed && illuminated) {
                 lightsOff();
             }
             //Watch for changes to the selected group. If any, update display with proper name.
-            if (group != lastGroup)
-            {
+            if (group != lastGroup) {
                 groupName = Utility.KM_dictAGNames[(int)group];
                 lastGroup = group;
             }
-            //Update tweakables GUI
-            Fields["displayAlt"].guiUnits = (useKilometer ? "km" : "m");
-            //Prevent negative target
-            if (targetAlt < 0) {
-                targetAlt = 0;
-            }            
-            //Update display altitude based on user input
-            displayAlt = (int)targetAlt;
+            //Prevent negative target altitudes
+            if (meterHeight < 0 || kilometerHeight < 0) {
+                meterHeight = 0;
+                kilometerHeight = 0;
+            }
         }
 
         public override void OnFixedUpdate()
@@ -134,14 +142,14 @@ namespace KM_Lib
             //If the device is armed, check for the trigger altitude
             if(isArmed) {
                 //We're ascending. Trigger at or above target height
-                if (!onlyDescent && lastAlt < alt && Math.Abs((alt-currentWindow) - (useKilometer ? targetAlt * 1000 : targetAlt)) < currentWindow) {
+                if (!onlyDescent && lastAlt < alt && Math.Abs((alt-currentWindow) - (useKilometer ? kilometerHeight * 1000 : meterHeight)) < currentWindow) {
                     print("Ascending at " + alt + ". Window is " + currentWindow + ". Vertical speed is " + this.vessel.verticalSpeed);
                     Utility.fireEvent(this.part, (int)group);
                     lightsOn();
                     isArmed = false;
                 }
                 //We're descending. Trigger at or below target height
-                else if (lastAlt > alt && Math.Abs((alt+currentWindow) - (useKilometer ? targetAlt * 1000 : targetAlt)) < currentWindow) {
+                else if (lastAlt > alt && Math.Abs((alt+currentWindow) - (useKilometer ? kilometerHeight * 1000 : meterHeight)) < currentWindow) {
                     print("Descending at " + alt + ". Window is " + currentWindow + ". Vertical speed is " + this.vessel.verticalSpeed);
                     Utility.fireEvent(this.part, (int)group);
                     lightsOn();
@@ -151,11 +159,11 @@ namespace KM_Lib
 
             //If auto reset is enabled, wait for departure from the target window and rearm
             if(!isArmed & autoReset) {
-                if (lastAlt < alt && Math.Abs((alt-currentWindow) - (useKilometer ? targetAlt * 1000 : targetAlt)) > currentWindow) {
+                if (lastAlt < alt && Math.Abs((alt-currentWindow) - (useKilometer ? kilometerHeight * 1000 : meterHeight)) > currentWindow) {
                     print("Rearming at " + alt + " at a velocity of " + this.vessel.verticalSpeed + ". Current window is " + currentWindow);
                     isArmed = true;
                 }
-                else if (lastAlt > alt && Math.Abs((alt + currentWindow) - (useKilometer ? targetAlt * 1000 : targetAlt)) > currentWindow) {
+                else if (lastAlt > alt && Math.Abs((alt + currentWindow) - (useKilometer ? kilometerHeight * 1000 : meterHeight)) > currentWindow) {
                     print("Rearming at " + alt + " at a velocity of " + this.vessel.verticalSpeed + ". Current window is " + currentWindow);
                     isArmed = true;
                 }
@@ -194,6 +202,41 @@ namespace KM_Lib
             illuminated = false;
         }
 
+        private void updateButtons() {
+            if (useKilometer) {
+                //Show meter button
+                Events["useMeters"].guiActiveEditor = true;
+                Events["useMeters"].guiActive = true;
+                //Hide meter scale
+                Fields["meterHeight"].guiActiveEditor = false;
+                Fields["meterHeight"].guiActive = false;
+                //Hide kilometer button
+                Events["useKilometers"].guiActiveEditor = false;
+                Events["useKilometers"].guiActive = false;
+                //Show kilometer scale
+                Fields["kilometerHeight"].guiActiveEditor = true;
+                Fields["kilometerHeight"].guiActive = true;
+                //Reset meter scale
+                meterHeight = 0;
+            }
+            else {
+                //Hide meter button
+                Events["useMeters"].guiActiveEditor = false;
+                Events["useMeters"].guiActive = false;
+                //Show meter scale
+                Fields["meterHeight"].guiActiveEditor = true;
+                Fields["meterHeight"].guiActive = true;
+                //Show kilometer button
+                Events["useKilometers"].guiActiveEditor = true;
+                Events["useKilometers"].guiActive = true;
+                //Hide kilometer scale
+                Fields["kilometerHeight"].guiActiveEditor = false;
+                Fields["kilometerHeight"].guiActive = false;
+                //Reset kilometer scale
+                kilometerHeight = 0;
+            }
+        }
+
         private void OnEditorAttach() {
             RenderingManager.AddToPostDrawQueue(99, updateEditor);
         }
@@ -209,19 +252,17 @@ namespace KM_Lib
 
         private void updateEditor() {
             //Adjust group name
-            if (group != lastGroup)
-            {
+            if (group != lastGroup) {
                 groupName = Utility.KM_dictAGNames[(int)group];
                 lastGroup = group;
             }
-            //Update display altitude units
-            Fields["displayAlt"].guiUnits = (useKilometer ? "km" : "m");
-            //Prevent a negative target altitude
-            if (targetAlt < 0) {
-                targetAlt = 0;
+            //Update buttons
+            updateButtons();
+            //Prevent negative target altitudes
+            if (meterHeight < 0 || kilometerHeight < 0) {
+                meterHeight = 0;
+                kilometerHeight = 0;
             }
-            //Update display altitude
-            displayAlt = (int)targetAlt;
         }
 
         #endregion
