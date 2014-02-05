@@ -50,8 +50,8 @@ namespace KM_Lib
             UI_Toggle(disabledText = "Disabled", enabledText = "Enabled")]
         public bool isArmed = true;
 
-        [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = false, guiName = "Fall Only"),
-            UI_Toggle(disabledText = "False", enabledText = "True")]
+        [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = false, guiName = "Trigger on"),
+            UI_Toggle(disabledText = "All", enabledText = "Descent")]
         public bool onlyDescent = false;
 
         [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = false, guiName = "Auto Reset"),
