@@ -94,6 +94,7 @@ namespace KM_Lib
         #region Variables
 
         private Boolean armed = true;
+        private int previousStage = 0;
 
         #endregion
 
@@ -134,12 +135,13 @@ namespace KM_Lib
             }
 
             //Check to see if the timer has been dragged in the staging list. If so, reset icon color
-            if (allowStage && armed == false && this.part.inverseStage < Staging.CurrentStage) {
+            if (this.part.inverseStage != previousStage && allowStage && !armed && this.part.inverseStage < Staging.CurrentStage) {
                 reset();
             }
+            previousStage = this.part.inverseStage;
 
             //If the timer has been activated, start the countdown, activate the model's LED, and change the icon color
-            if (triggerTime > 0 && armed == true) {
+            if (triggerTime > 0 && armed) {
                 remainingTime = triggerTime + triggerDelay - Time.time;
                 Utility.switchLight(this.part, "light-go", true);
                 Utility.playAnimationSetToPosition(this.part, "glow", 1);
