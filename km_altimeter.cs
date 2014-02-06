@@ -143,14 +143,12 @@ namespace KM_Lib
             if(isArmed) {
                 //We're ascending. Trigger at or above target height
                 if (!onlyDescent && lastAlt < alt && Math.Abs((alt-currentWindow) - (useKilometer ? kilometerHeight * 1000 : meterHeight)) < currentWindow) {
-                    print("Ascending at " + alt + ". Window is " + currentWindow + ". Vertical speed is " + this.vessel.verticalSpeed);
                     Utility.fireEvent(this.part, (int)group);
                     lightsOn();
                     isArmed = false;
                 }
                 //We're descending. Trigger at or below target height
                 else if (lastAlt > alt && Math.Abs((alt+currentWindow) - (useKilometer ? kilometerHeight * 1000 : meterHeight)) < currentWindow) {
-                    print("Descending at " + alt + ". Window is " + currentWindow + ". Vertical speed is " + this.vessel.verticalSpeed);
                     Utility.fireEvent(this.part, (int)group);
                     lightsOn();
                     isArmed = false;
@@ -160,11 +158,9 @@ namespace KM_Lib
             //If auto reset is enabled, wait for departure from the target window and rearm
             if(!isArmed & autoReset) {
                 if (lastAlt < alt && Math.Abs((alt-currentWindow) - (useKilometer ? kilometerHeight * 1000 : meterHeight)) > currentWindow) {
-                    print("Rearming at " + alt + " at a velocity of " + this.vessel.verticalSpeed + ". Current window is " + currentWindow);
                     isArmed = true;
                 }
                 else if (lastAlt > alt && Math.Abs((alt + currentWindow) - (useKilometer ? kilometerHeight * 1000 : meterHeight)) > currentWindow) {
-                    print("Rearming at " + alt + " at a velocity of " + this.vessel.verticalSpeed + ". Current window is " + currentWindow);
                     isArmed = true;
                 }
             }
@@ -185,7 +181,7 @@ namespace KM_Lib
             //Use the lowest of the two values as the current altitude.
             alt = (altSurface < altSea ? altSurface : altSea);
             //Update target window size based on current vertical velocity
-            currentWindow = Math.Pow((Math.Sqrt(Math.Abs(this.vessel.verticalSpeed)) / 10), 2) + 1;
+            currentWindow = Math.Abs((TimeWarp.fixedDeltaTime * this.vessel.verticalSpeed) * 1.05);
         }
 
         private void lightsOn() {
