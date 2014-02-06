@@ -93,10 +93,10 @@ namespace KM_Lib
 
         #region Variables
 
-        private double lastAlt = 0;
         private double alt = 0;
         private double currentWindow = 0;
         private Boolean illuminated = false;
+        private Boolean ascending = false;
 
         #endregion
 
@@ -142,13 +142,13 @@ namespace KM_Lib
             //If the device is armed, check for the trigger altitude
             if(isArmed) {
                 //We're ascending. Trigger at or above target height
-                if (!onlyDescent && lastAlt < alt && Math.Abs((alt-currentWindow) - (useKilometer ? kilometerHeight * 1000 : meterHeight)) < currentWindow) {
+                if (!onlyDescent && ascending && Math.Abs((alt-currentWindow) - (useKilometer ? kilometerHeight * 1000 : meterHeight)) < currentWindow) {
                     Utility.fireEvent(this.part, (int)group);
                     lightsOn();
                     isArmed = false;
                 }
                 //We're descending. Trigger at or below target height
-                else if (lastAlt > alt && Math.Abs((alt+currentWindow) - (useKilometer ? kilometerHeight * 1000 : meterHeight)) < currentWindow) {
+                else if (!ascending && Math.Abs((alt+currentWindow) - (useKilometer ? kilometerHeight * 1000 : meterHeight)) < currentWindow) {
                     Utility.fireEvent(this.part, (int)group);
                     lightsOn();
                     isArmed = false;
@@ -157,10 +157,10 @@ namespace KM_Lib
 
             //If auto reset is enabled, wait for departure from the target window and rearm
             if(!isArmed & autoReset) {
-                if (lastAlt < alt && Math.Abs((alt-currentWindow) - (useKilometer ? kilometerHeight * 1000 : meterHeight)) > currentWindow) {
+                if (ascending && Math.Abs((alt-currentWindow) - (useKilometer ? kilometerHeight * 1000 : meterHeight)) > currentWindow) {
                     isArmed = true;
                 }
-                else if (lastAlt > alt && Math.Abs((alt + currentWindow) - (useKilometer ? kilometerHeight * 1000 : meterHeight)) > currentWindow) {
+                else if (!ascending && Math.Abs((alt + currentWindow) - (useKilometer ? kilometerHeight * 1000 : meterHeight)) > currentWindow) {
                     isArmed = true;
                 }
             }
@@ -176,8 +176,9 @@ namespace KM_Lib
             double altSea = this.vessel.mainBody.GetAltitude(this.vessel.CoM);
             //Altitude over terrain. Does not factor in ocean surface.
             double altSurface = altSea - this.vessel.terrainAltitude;
-            //Set the last altitude for the purpose of direction determination
-            lastAlt = alt;
+            //Determine if vessel is ascending or descending
+            double lastAlt = alt;
+            ascending = (lastAlt < alt ? true : false);
             //Use the lowest of the two values as the current altitude.
             alt = (altSurface < altSea ? altSurface : altSea);
             //Update target window size based on current vertical velocity
