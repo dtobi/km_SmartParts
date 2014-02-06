@@ -176,11 +176,12 @@ namespace KM_Lib
             double altSea = this.vessel.mainBody.GetAltitude(this.vessel.CoM);
             //Altitude over terrain. Does not factor in ocean surface.
             double altSurface = altSea - this.vessel.terrainAltitude;
-            //Determine if vessel is ascending or descending
+            //Set the last altitude for the purpose of direction determination
             double lastAlt = alt;
-            ascending = (lastAlt < alt ? true : false);
             //Use the lowest of the two values as the current altitude.
             alt = (altSurface < altSea ? altSurface : altSea);
+            //Determine if the vessel is ascending or descending
+            ascending = (lastAlt < alt ? true : false);
             //Update target window size based on current vertical velocity
             currentWindow = Math.Abs((TimeWarp.fixedDeltaTime * this.vessel.verticalSpeed) * 1.05);
         }
