@@ -97,6 +97,7 @@ namespace KM_Lib
         private double currentWindow = 0;
         private Boolean illuminated = false;
         private Boolean ascending = false;
+        private Boolean fireNextupdate = false;
 
         #endregion
 
@@ -132,6 +133,11 @@ namespace KM_Lib
                 meterHeight = 0;
                 kilometerHeight = 0;
             }
+            //In order for physics to take effect on jettisoned parts, the staging event has to be fired from OnUpdate
+            if (fireNextupdate) {
+                Utility.fireEvent(this.part, (int)group);
+                fireNextupdate = false;
+            }
         }
 
         public override void OnFixedUpdate()
@@ -143,13 +149,15 @@ namespace KM_Lib
             if(isArmed) {
                 //We're ascending. Trigger at or above target height
                 if (!onlyDescent && ascending && Math.Abs((alt-currentWindow) - (useKilometer ? kilometerHeight * 1000 : meterHeight)) < currentWindow) {
-                    Utility.fireEvent(this.part, (int)group);
+                    //This flag is checked for in OnUpdate to trigger staging
+                    fireNextupdate = true;
                     lightsOn();
                     isArmed = false;
                 }
                 //We're descending. Trigger at or below target height
                 else if (!ascending && Math.Abs((alt+currentWindow) - (useKilometer ? kilometerHeight * 1000 : meterHeight)) < currentWindow) {
-                    Utility.fireEvent(this.part, (int)group);
+                    //This flag is checked for in OnUpdate to trigger staging
+                    fireNextupdate = true;
                     lightsOn();
                     isArmed = false;
                 }
