@@ -164,8 +164,14 @@ namespace KM_Lib
             {
                 MonoBehaviour.print ("Activate:" + stageItem);
                 stageItem.activate (highestNextStage, stageItem.vessel);
+                stageItem.inverseStage = v.currentStage;
             }
             v.currentStage = highestNextStage;
+            //If this is the currently active vessel, activate the next, now empty, stage. This is an ugly, ugly hack but it's the only way to clear out the empty stage.
+            //Switching to a vessel that has been staged this way already clears out the empty stage, so this isn't required for those.
+            if (v.isActiveVessel) {
+                Staging.ActivateNextStage();
+            }
 
         }
 
