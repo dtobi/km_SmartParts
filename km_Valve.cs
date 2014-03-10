@@ -29,18 +29,74 @@ namespace KM_Lib
 {
     public class KM_Valve : PartModule
     {
+        #region Fields/Variables
 
         private Dictionary<String, double> drainRatio = new Dictionary<String, double> ();
 
         static float maxSpeedY = -1.0f;
         KSPParticleEmitter valveEffect = null;
 
-        [KSPField(isPersistant = true, guiName = "Opened")] // remember if the part is inflated
+        [KSPField(isPersistant = true, guiName = "Opened")] // remember if the part is open
         public bool isOpen = false;
 
-        public override void OnStart(StartState state)
-        {
+        [KSPField(isPersistant = true)]
+        private Boolean allowStage = false;
+
+        [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "Outlet") , UI_FloatRange(minValue = 0f, maxValue = 100f, stepIncrement = 5f)]
+        public float force = 10;
+
+        #endregion
+
+
+        #region Events
+
+        [KSPEvent(guiActive = false, guiActiveEditor = false, guiName = "Enable Staging")]
+        public void activateStaging() {
+            enableStaging();
+        }
+
+        [KSPEvent(guiActive = false, guiActiveEditor = false, guiName = "Disable Staging")]
+        public void deactivateStaging() {
+            disableStaging();
+        }
+
+        [KSPEvent(guiName = "Toggle", guiActive = true, guiActiveEditor = false)]
+        public void toggleValve() {
+            setValve(!isOpen);
+        }
+
+        [KSPAction("Toggle")]
+        public void toggleValveAG(KSPActionParam param) {
+            setValve(!isOpen);
+        }
+
+        [KSPAction("Open")]
+        public void openValveAG(KSPActionParam param) {
+            setValve(true);
+        }
+
+        [KSPAction("Close")]
+        public void closeValveAG(KSPActionParam param) {
+            setValve(false);
+        }
+
+        #endregion
+
+
+        #region Overrides
+
+        public override void OnStart(StartState state) {
             valveEffect = (KSPParticleEmitter )this.part.GetComponentInChildren <KSPParticleEmitter > ();
+
+            if (allowStage) {
+                Events["activateStaging"].guiActiveEditor = false;
+                Events["deactivateStaging"].guiActiveEditor = true;
+            }
+            else {
+                Invoke("disableStaging", 0.25f);
+            }
+            GameEvents.onVesselChange.Add(onVesselChange);
+
             if (valveEffect  != null) {
                 valveEffect.emit = isOpen;
                 valveEffect.localVelocity.y = maxSpeedY * force / 100;    
@@ -49,7 +105,6 @@ namespace KM_Lib
             }
 
             if (state != StartState.Editor) {
-
                 // determine max amount of resources in parent part
                 double totalResourceAmount = 0;
                 foreach (PartResource resource in part.parent.Resources) {
@@ -66,62 +121,73 @@ namespace KM_Lib
                     print ("Valve: Adding ressource:" + resource.resourceName + " DR:" + resource.maxAmount / totalResourceAmount);
                 }
             }
-
         }
 
-        [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "Outlet") , UI_FloatRange(minValue = 0f, maxValue = 100f, stepIncrement = 5f)]
-        public float force = 10;
-
-
-
-
-        [KSPEvent(guiName = "Toggle", guiActive = true, guiActiveEditor = false)]
-        public void toggleValve ()
-        {   
-            setValve (!isOpen); 
-        }
-
-        [KSPAction("Toggle")]
-        public void toggleValveAG (KSPActionParam param)
-        {   
-            setValve (!isOpen); 
-        }
-
-        [KSPAction("Open")]
-        public void openValveAG (KSPActionParam param)
-        {   
-            setValve (true); 
-        }
-
-        [KSPAction("Close")]
-        public void closeValveAG (KSPActionParam param)
-        {   
-            setValve (false); 
-        }
-
-          public void setValve (bool nextIsOpen)
-        {   
-            if (valveEffect  != null) {
-                isOpen = nextIsOpen;
-                valveEffect.emit = nextIsOpen;
-            } 
-        }
-
-
-        public override void OnUpdate()
-        {
+        public override void OnUpdate() {
             if (isOpen) {
-                valveEffect.localVelocity.y = maxSpeedY * force / 100;
                 double receivedRessource = 0;
+                float timeStep = TimeWarp.deltaTime;
+                //Flow rate * number of resources vented * current time step * thrust coefficient (assuming ISP of ~65 and 5 kg per unit of fuel)
+                float appliedForce = force * part.parent.Resources.Count * timeStep * .65f;
+                valveEffect.localVelocity.y = maxSpeedY * force / 100;
+                this.rigidbody.AddRelativeForce(Vector3.up * appliedForce * 1);
                 foreach (PartResource resource in part.parent.Resources) {
                     if (resource.resourceName == "ElectricCharge")
                         continue;
-                    receivedRessource += this.part.RequestResource(resource.resourceName, force*TimeWarp.fixedDeltaTime*drainRatio[resource.resourceName]);
+                    receivedRessource += this.part.RequestResource(resource.resourceName, force*timeStep*drainRatio[resource.resourceName]);
                 }
                 if (receivedRessource == 0)
                     setValve (false);
             }
         }
+
+        public override void OnActive() {
+            //If staging enabled, open valve
+            if (allowStage) {
+                setValve(true);
+                this.part.stackIcon.SetIconColor(XKCDColors.Red);
+            }
+        }
+
+        #endregion
+
+
+        #region Methods
+
+        public void setValve(bool nextIsOpen) {
+            if (valveEffect != null) {
+                isOpen = nextIsOpen;
+                valveEffect.emit = nextIsOpen;
+            }
+        }
+
+        public void onVesselChange(Vessel newVessel) {
+            if (newVessel == this.vessel && !allowStage) {
+                Invoke("disableStaging", 0.25f);
+            }
+        }
+
+        private void enableStaging() {
+            part.stackIcon.CreateIcon();
+            Staging.SortIcons();
+            allowStage = true;
+
+            //Toggle button visibility so currently inactive mode's button is visible
+            Events["activateStaging"].guiActiveEditor = false;
+            Events["deactivateStaging"].guiActiveEditor = true;
+        }
+
+        private void disableStaging() {
+            part.stackIcon.RemoveIcon();
+            Staging.SortIcons();
+            allowStage = false;
+
+            //Toggle button visibility so currently inactive mode's button is visible
+            Events["activateStaging"].guiActiveEditor = true;
+            Events["deactivateStaging"].guiActiveEditor = false;
+        }
+
+        #endregion
     }
 }
 
