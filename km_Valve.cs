@@ -40,7 +40,7 @@ namespace KM_Lib
         public bool isOpen = false;
 
         [KSPField(isPersistant = true)]
-        private Boolean allowStage = false;
+        private Boolean allowStage = true;
 
         [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "Outlet") , UI_FloatRange(minValue = 0f, maxValue = 100f, stepIncrement = 5f)]
         public float force = 10;
@@ -145,7 +145,6 @@ namespace KM_Lib
             //If staging enabled, open valve
             if (allowStage) {
                 setValve(true);
-                this.part.stackIcon.SetIconColor(XKCDColors.Red);
             }
         }
 
@@ -159,6 +158,7 @@ namespace KM_Lib
                 isOpen = nextIsOpen;
                 valveEffect.emit = nextIsOpen;
             }
+            this.part.stackIcon.SetIconColor((isOpen ? XKCDColors.Red : XKCDColors.White));
         }
 
         public void onVesselChange(Vessel newVessel) {
