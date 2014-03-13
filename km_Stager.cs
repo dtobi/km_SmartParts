@@ -61,7 +61,7 @@ namespace KM_Lib
 
         private int executionLimiter = 0;
 
-        private int executionFrequency = 3; // the update loop will only execute every executionFrequency'th time
+        private int executionFrequency = 10; // the update loop will only execute every executionFrequency'th time
 
         private Part getObservedPart(){
 
