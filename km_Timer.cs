@@ -43,9 +43,13 @@ namespace KM_Lib
         [KSPField(isPersistant = true, guiActive = false)]
         private double triggerTime = 0;
 
-        // default delay is 0. This can be overwritten by action groups.
-        [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "Delay", guiUnits = "s"), UI_FloatRange(minValue = 0.5f, maxValue = 20f, stepIncrement = 0.5f)]
-        private float triggerDelay = 5;
+        // Delay in seconds. Used for precise measurement
+        [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = false, guiName = "Seconds", guiUnits = "s"), UI_FloatRange(minValue = -1.6f, maxValue = 30f, stepIncrement = 0.2f)]
+        private float triggerDelaySeconds = 0;
+
+        // Delay in minutes. Used for longer term measurement
+        [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = false, guiName = "Minutes", guiUnits = "m"), UI_FloatRange(minValue = -3.5f, maxValue = 60f, stepIncrement = 0.5f)]
+        private float triggerDelayMinutes = 0.5f;
 
         [KSPField(isPersistant = true, guiActive = true, guiName = "Remaining Time", guiFormat = "F2")]
         private double remainingTime = 0;
@@ -53,11 +57,26 @@ namespace KM_Lib
         [KSPField(isPersistant = true)]
         private Boolean allowStage = true;
 
+        [KSPField(isPersistant = true)]
+        private Boolean useSeconds = true;
+
         #endregion
         
 
         #region Events
-        
+
+        [KSPEvent(guiActive = false, guiActiveEditor = false, guiName = "Use Seconds")]
+        public void setSeconds() {
+            useSeconds = true;
+            updateButtons();
+        }
+
+        [KSPEvent(guiActive = false, guiActiveEditor = false, guiName = "Use Minutes")]
+        public void setMinutes() {
+            useSeconds = false;
+            updateButtons();
+        }
+
         [KSPEvent(guiActive = false, guiActiveEditor = false, guiName = "Enable Staging")]
         public void activateStaging() {
            enableStaging();
@@ -117,6 +136,8 @@ namespace KM_Lib
             }
             GameEvents.onVesselChange.Add(onVesselChange);
             part.ActivatesEvenIfDisconnected = true;
+            //Initial button layout
+            updateButtons();
         }
 
         public override void OnActive() {            
@@ -134,6 +155,12 @@ namespace KM_Lib
                 lastGroup = group;
             }
 
+            //Prevent negative times
+            if (triggerDelaySeconds < 0 || triggerDelayMinutes < 0.5) {
+                triggerDelaySeconds = 0;
+                triggerDelayMinutes = 0.5f;
+            }
+
             //Check to see if the timer has been dragged in the staging list. If so, reset icon color
             if (this.part.inverseStage != previousStage && allowStage && !armed && this.part.inverseStage < Staging.CurrentStage) {
                 reset();
@@ -142,7 +169,7 @@ namespace KM_Lib
 
             //If the timer has been activated, start the countdown, activate the model's LED, and change the icon color
             if (triggerTime > 0 && armed) {
-                remainingTime = triggerTime + triggerDelay - Time.time;
+                remainingTime = triggerTime + (useSeconds ? triggerDelaySeconds : triggerDelayMinutes * 60) - Time.time;
                 Utility.switchLight(this.part, "light-go", true);
                 Utility.playAnimationSetToPosition(this.part, "glow", 1);
                 this.part.stackIcon.SetIconColor(XKCDColors.BrightYellow);
@@ -195,7 +222,7 @@ namespace KM_Lib
             if (armed) {
                 //Set the trigger time, which will be caught in OnUpdate
                 triggerTime = Time.fixedTime;
-                print("Activating Timer: " + triggerDelay);
+                print("Activating Timer: " + (useSeconds ? triggerDelaySeconds : triggerDelayMinutes * 60));
                 }
         }
 
@@ -211,6 +238,41 @@ namespace KM_Lib
             //Reset armed variable
             armed = true;
         }
+
+         private void updateButtons() {
+            if (useSeconds) {
+                //Show minute button
+                Events["setMinutes"].guiActiveEditor = true;
+                Events["setMinutes"].guiActive = true;
+                //Hide minute scale
+                Fields["triggerDelayMinutes"].guiActiveEditor = false;
+                Fields["triggerDelayMinutes"].guiActive = false;
+                //Hide seconds button
+                Events["setSeconds"].guiActiveEditor = false;
+                Events["setSeconds"].guiActive = false;
+                //Show seconds scale
+                Fields["triggerDelaySeconds"].guiActiveEditor = true;
+                Fields["triggerDelaySeconds"].guiActive = true;
+                //Reset minute scale
+                triggerDelayMinutes = 0.5f;
+            }
+            else {
+                //Hide minute button
+                Events["setMinutes"].guiActiveEditor = false;
+                Events["setMinutes"].guiActive = false;
+                //Show minute scale
+                Fields["triggerDelayMinutes"].guiActiveEditor = true;
+                Fields["triggerDelayMinutes"].guiActive = true;
+                //Show seconds button
+                Events["setSeconds"].guiActiveEditor = true;
+                Events["setSeconds"].guiActive = true;
+                //Hide seconds scale
+                Fields["triggerDelaySeconds"].guiActiveEditor = false;
+                Fields["triggerDelaySeconds"].guiActive = false;
+                //Reset seconds scale
+                triggerDelaySeconds = 0;
+            }
+         }
 
         private void OnEditorAttach() {
             RenderingManager.AddToPostDrawQueue(99, updateEditor);
@@ -229,7 +291,13 @@ namespace KM_Lib
                 groupName = Utility.KM_dictAGNames [(int)group];
                 lastGroup = group;
             }
-
+            //Update Buttons
+            updateButtons();
+            //Prevent negative times
+            if (triggerDelaySeconds < 0 || triggerDelayMinutes < 0.5) {
+                triggerDelaySeconds = 0;
+                triggerDelayMinutes = 0.5f;
+            }
         }
 
         #endregion

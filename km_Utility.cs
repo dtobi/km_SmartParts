@@ -1,5 +1,5 @@
 /*
- * Author: dtobi
+ * Author: dtobi, Firov
  * This work is shared under CC BY-NC-ND 3.0 license.
  * Non commercial, no derivatives, attribution if shared unmodified.
  * You may distribute this code and the compiled .dll as is.
