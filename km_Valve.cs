@@ -45,6 +45,9 @@ namespace KM_Lib
         [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "Outlet") , UI_FloatRange(minValue = 0f, maxValue = 100f, stepIncrement = 5f)]
         public float force = 10;
 
+        [KSPField(isPersistant = false)]
+        public int facing;
+
         #endregion
 
 
@@ -130,7 +133,7 @@ namespace KM_Lib
                 //Flow rate * number of resources vented * current time step * thrust coefficient (assuming ISP of ~65 and 5 kg per unit of fuel)
                 float appliedForce = force * part.parent.Resources.Count * timeStep * .65f;
                 valveEffect.localVelocity.y = maxSpeedY * force / 100;
-                this.rigidbody.AddRelativeForce(Vector3.up * appliedForce * 1);
+                this.rigidbody.AddRelativeForce((facing==0 ? Vector3.up : Vector3.forward) * appliedForce * 1);
                 foreach (PartResource resource in part.parent.Resources) {
                     if (resource.resourceName == "ElectricCharge")
                         continue;
