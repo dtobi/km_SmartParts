@@ -89,11 +89,13 @@ namespace KM_Lib
 
         [KSPEvent(guiName = "Start Countdown", guiActive = true)]
         public void activateTimer () {
+            reset();
             setTimer();
         }
 
         [KSPAction("Start Countdown")]
         public void activateTimerAG(KSPActionParam param) {
+            reset();
             setTimer();
         }
 
