@@ -25,17 +25,18 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 using KSP.IO;
+using KSPAPIExtensions;
 
 namespace KM_Lib
 {
     public class KM_Stager : PartModule
     {
-        [KSPField (isPersistant = false, guiActive = true, guiActiveEditor = true, guiName = "Group")]
-        public String groupName = "Stage";
-
-        [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "Select") , UI_FloatRange(minValue = 0f, maxValue = 16f, stepIncrement = 1f)]
-        public float group = 0;
-        private float lastGroup = 0;
+        [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "Group"),
+            UI_ChooseOption(
+                options = new String[] { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15" },
+                display = new String[] { "Stage", "AG1", "AG2", "AG3", "AG4", "AG5", "AG6", "AG7", "AG8", "AG9", "AG10", "Lights", "RCS", "SAS", "Brakes", "Abort" }
+            )]
+        public string group = "0";
 
         [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = false, guiName = "Detection"),
             UI_Toggle(disabledText = "Disabled", enabledText = "Enabled")]
@@ -58,9 +59,7 @@ namespace KM_Lib
         private Part observedPart = null;
 
         private double lastFill = 0; // save the last fill level when the tank drains
-
         private int executionLimiter = 0;
-
         private int executionFrequency = 10; // the update loop will only execute every executionFrequency'th time
 
         private Part getObservedPart(){
@@ -95,12 +94,6 @@ namespace KM_Lib
         public override void OnUpdate()
         {
             if(executionLimiter++ % executionFrequency == 0){
-
-                if (group != lastGroup) {
-                    groupName = Utility.KM_dictAGNames [(int)group];
-                    lastGroup = group;
-                }
-
                 if(!isActive){
                     Utility.switchLight (this.part, "light-go", false);
                     Utility.playAnimationSetToPosition (this.part, "glow", 0);
@@ -114,7 +107,7 @@ namespace KM_Lib
                         currentFill += resource.amount;
                     }
                     if (currentFill < 2 && lastFill == currentFill) {
-                        Utility.fireEvent (this.part, (int)group);
+                        Utility.fireEvent (this.part, int.Parse(group));
                         print ("Tank empty. Fire event");
                         isActive = false;
 
@@ -155,10 +148,7 @@ namespace KM_Lib
         }
 
         private void updateEditor(){
-            if (group != lastGroup) {
-                groupName = Utility.KM_dictAGNames [(int)group];
-                lastGroup = group;
-            }
+
         }
     }
 }

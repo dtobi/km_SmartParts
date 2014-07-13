@@ -25,6 +25,7 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 using KSP.IO;
+using KSPAPIExtensions;
 
 namespace KM_Lib
 {
@@ -44,12 +45,12 @@ namespace KM_Lib
         [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "Channel") , UI_FloatRange(minValue = 1f, maxValue = 20f, stepIncrement = 1f)]
         public float channel = 1;
 
-        [KSPField (isPersistant = false, guiActive = true, guiActiveEditor = true, guiName = "Group")]
-        public String groupName = "Stage";
-
-        [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "Select") , UI_FloatRange(minValue = 0f, maxValue = 16f, stepIncrement = 1f)]
-        public float group = 0;
-        private float lastGroup = 0;
+        [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "Group"),
+            UI_ChooseOption(
+                options = new String[] { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15" },
+                display = new String[] { "Stage", "AG1", "AG2", "AG3", "AG4", "AG5", "AG6", "AG7", "AG8", "AG9", "AG10", "Lights", "RCS", "SAS", "Brakes", "Abort" }
+            )]
+        public string group = "0";
 
         double fireTime = 0;
         double lightOnTime = 2;
@@ -60,7 +61,7 @@ namespace KM_Lib
         [KSPAction("Transmit")]
         public void transmit_AG (KSPActionParam param)
         {
-            transmitCommand (group);
+            transmitCommand (float.Parse(group));
         }
 
         [KSPAction("Transmit Stage")]
@@ -163,7 +164,7 @@ namespace KM_Lib
         [KSPEvent(guiName = "Transmit Command", guiActive = true)]
         public void transmit_GUI ()
         {
-            transmitCommand (group);
+            transmitCommand (float.Parse(group));
         }
 
         [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "Throttle") , UI_FloatRange(minValue = 0f, maxValue = 1f, stepIncrement = 0.05f)]
@@ -331,10 +332,6 @@ namespace KM_Lib
 
         public override void OnUpdate()
         {
-            if (group != lastGroup) {
-                groupName = Utility.KM_dictAGNames [(int)group];
-                lastGroup = group;
-            }
 
             if (enableSync && updateCounter % 30 == 0 && this.vessel == FlightGlobals.ActiveVessel) {
                 transmitRotation (this.vessel.GetTransform().rotation, false);
@@ -382,10 +379,6 @@ namespace KM_Lib
         }
 
         private void updateEditor(){
-            if (group != lastGroup) {  
-                groupName = Utility.KM_dictAGNames [(int)group];
-                lastGroup = group;
-            }
 
         }
     }

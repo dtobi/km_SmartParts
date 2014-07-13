@@ -25,6 +25,7 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 using KSP.IO;
+using KSPAPIExtensions;
 
 namespace KM_Lib
 {
@@ -32,24 +33,26 @@ namespace KM_Lib
     {
         #region Fields
 
-        [KSPField (isPersistant = false, guiActive = true, guiActiveEditor = true, guiName = "Group")]
-        public String groupName = "Stage";
-
-        [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "Select") , UI_FloatRange(minValue = 0f, maxValue = 16f, stepIncrement = 1f)]
-        public float group = 0;
-        private float lastGroup = 0;
+        [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "Group"),
+            UI_ChooseOption(
+                options = new String[] { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15" },
+                display = new String[] { "Stage", "AG1", "AG2", "AG3", "AG4", "AG5", "AG6", "AG7", "AG8", "AG9", "AG10", "Lights", "RCS", "SAS", "Brakes", "Abort" }
+            )]
+        public string group = "0";
 
         // remember the time wehen the countdown was started
         [KSPField(isPersistant = true, guiActive = false)]
         private double triggerTime = 0;
 
         // Delay in seconds. Used for precise measurement
-        [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = false, guiName = "Seconds", guiUnits = "s"), UI_FloatRange(minValue = -1.6f, maxValue = 30f, stepIncrement = 0.2f)]
-        private float triggerDelaySeconds = 0;
+        [KSPField(isPersistant = true, guiActiveEditor = false, guiActive = false, guiName = "Seconds", guiFormat = "F2", guiUnits = "sec"),
+            UI_FloatEdit(scene = UI_Scene.All, minValue = 0f, maxValue = 120f, incrementLarge = 20f, incrementSmall = 1f, incrementSlide = .05f)]
+        public float triggerDelaySeconds = 0;
 
         // Delay in minutes. Used for longer term measurement
-        [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = false, guiName = "Minutes", guiUnits = "m"), UI_FloatRange(minValue = -3.5f, maxValue = 60f, stepIncrement = 0.5f)]
-        private float triggerDelayMinutes = 0.5f;
+        [KSPField(isPersistant = true, guiActiveEditor = false, guiActive = false, guiName = "Minutes", guiFormat = "F2", guiUnits = "min"),
+            UI_FloatEdit(scene = UI_Scene.All, minValue = 0f, maxValue = 360f, incrementLarge = 60f, incrementSmall = 5f, incrementSlide = .25f)]
+        public float triggerDelayMinutes = 0;
 
         [KSPField(isPersistant = true, guiActive = true, guiName = "Remaining Time", guiFormat = "F2")]
         private double remainingTime = 0;
@@ -151,18 +154,6 @@ namespace KM_Lib
 
         public override void OnUpdate()
         {
-            //Watch for changes to the selected group. If any, update display with proper name.
-            if (group != lastGroup) {
-                groupName = Utility.KM_dictAGNames [(int)group];
-                lastGroup = group;
-            }
-
-            //Prevent negative times
-            if (triggerDelaySeconds < 0 || triggerDelayMinutes < 0.5) {
-                triggerDelaySeconds = 0;
-                triggerDelayMinutes = 0.5f;
-            }
-
             //Check to see if the timer has been dragged in the staging list. If so, reset icon color
             if (this.part.inverseStage != previousStage && allowStage && !armed && this.part.inverseStage < Staging.CurrentStage) {
                 reset();
@@ -178,8 +169,8 @@ namespace KM_Lib
 
                 //Once the timer hits 0 activate the stage/AG, disable the model's LED, and change the icon color
                 if (remainingTime < 0) {
-                    print ("Stage:"+Utility.KM_dictAGNames [(int)group]);
-                    Utility.fireEvent (this.part, (int)group);
+                    print ("Stage:"+Utility.KM_dictAGNames [int.Parse(group)]);
+                    Utility.fireEvent (this.part, int.Parse(group));
                     this.part.stackIcon.SetIconColor(XKCDColors.Red);
                     triggerTime = 0;
                     remainingTime = 0;
@@ -256,7 +247,7 @@ namespace KM_Lib
                 Fields["triggerDelaySeconds"].guiActiveEditor = true;
                 Fields["triggerDelaySeconds"].guiActive = true;
                 //Reset minute scale
-                triggerDelayMinutes = 0.5f;
+                triggerDelayMinutes = 0f;
             }
             else {
                 //Hide minute button
@@ -289,17 +280,8 @@ namespace KM_Lib
         }
 
         private void updateEditor() {
-            if (group != lastGroup) {
-                groupName = Utility.KM_dictAGNames [(int)group];
-                lastGroup = group;
-            }
             //Update Buttons
             updateButtons();
-            //Prevent negative times
-            if (triggerDelaySeconds < 0 || triggerDelayMinutes < 0.5) {
-                triggerDelaySeconds = 0;
-                triggerDelayMinutes = 0.5f;
-            }
         }
 
         #endregion

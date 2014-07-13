@@ -25,6 +25,7 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 using KSP.IO;
+using KSPAPIExtensions;
 
 namespace KM_Lib
 {
@@ -33,17 +34,19 @@ namespace KM_Lib
 
         #region Fields
 
-        [KSPField(isPersistant = false, guiActive = true, guiActiveEditor = true, guiName = "Group")]
-        public String groupName = "Stage";
+        [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "Group"),
+            UI_ChooseOption(
+                options = new String[] { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15" }, 
+                display = new String[] { "Stage", "AG1", "AG2", "AG3", "AG4", "AG5", "AG6", "AG7", "AG8", "AG9", "AG10", "Lights", "RCS", "SAS", "Brakes", "Abort" }
+            )]
+        public string group = "0";
 
-        [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "Select"), UI_FloatRange(minValue = 0f, maxValue = 16f, stepIncrement = 1f)]
-        public float group = 0;
-        private float lastGroup = 0;
-
-        [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = false, guiName = "Meters", guiUnits = "m"), UI_FloatRange(minValue = -50f, maxValue = 1000f, stepIncrement = 5f)]
+        [KSPField(isPersistant = true, guiActiveEditor = false, guiActive = false, guiName = "Meters", guiFormat = "F0", guiUnits="m"),
+            UI_FloatEdit(scene = UI_Scene.All, minValue = 0f, maxValue = 1000f, incrementLarge = 200f, incrementSmall = 25f, incrementSlide = 1f)]
         public float meterHeight = 0;
 
-        [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = false, guiName = "Kilometers", guiUnits = "km"), UI_FloatRange(minValue = -5f, maxValue = 100f, stepIncrement = 1f)]
+        [KSPField(isPersistant = true, guiActiveEditor = false, guiActive = false, guiName = "Kilometers", guiFormat = "F0", guiUnits = "km"),
+            UI_FloatEdit(scene = UI_Scene.All, minValue = 0f, maxValue = 500f, incrementLarge = 100f, incrementSmall = 25f, incrementSlide = 1f)]
         public float kilometerHeight = 0;
 
         [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = false, guiName = "Detection"),
@@ -51,8 +54,8 @@ namespace KM_Lib
         public bool isArmed = true;
 
         [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = false, guiName = "Trigger on"),
-            UI_Toggle(disabledText = "All", enabledText = "Descent")]
-        public bool onlyDescent = false;
+            UI_ChooseOption(options = new string[] {"All", "Ascent", "Descent"})]
+        public string direction = "All";
 
         [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = false, guiName = "Auto Reset"),
             UI_Toggle(disabledText = "False", enabledText = "True")]
@@ -123,19 +126,9 @@ namespace KM_Lib
             if (isArmed && illuminated) {
                 lightsOff();
             }
-            //Watch for changes to the selected group. If any, update display with proper name.
-            if (group != lastGroup) {
-                groupName = Utility.KM_dictAGNames[(int)group];
-                lastGroup = group;
-            }
-            //Prevent negative target altitudes
-            if (meterHeight < 0 || kilometerHeight < 0) {
-                meterHeight = 0;
-                kilometerHeight = 0;
-            }
             //In order for physics to take effect on jettisoned parts, the staging event has to be fired from OnUpdate
             if (fireNextupdate) {
-                Utility.fireEvent(this.part, (int)group);
+                Utility.fireEvent(this.part, int.Parse(group));
                 fireNextupdate = false;
             }
         }
@@ -148,14 +141,14 @@ namespace KM_Lib
             //If the device is armed, check for the trigger altitude
             if(isArmed) {
                 //We're ascending. Trigger at or above target height
-                if (!onlyDescent && ascending && Math.Abs((alt-currentWindow) - (useKilometer ? kilometerHeight * 1000 : meterHeight)) < currentWindow) {
+                if (direction != "Descent" && ascending && Math.Abs((alt-currentWindow) - (useKilometer ? kilometerHeight * 1000 : meterHeight)) < currentWindow) {
                     //This flag is checked for in OnUpdate to trigger staging
                     fireNextupdate = true;
                     lightsOn();
                     isArmed = false;
                 }
                 //We're descending. Trigger at or below target height
-                else if (!ascending && Math.Abs((alt+currentWindow) - (useKilometer ? kilometerHeight * 1000 : meterHeight)) < currentWindow) {
+                else if (direction != "Ascent" && !ascending && Math.Abs((alt+currentWindow) - (useKilometer ? kilometerHeight * 1000 : meterHeight)) < currentWindow) {
                     //This flag is checked for in OnUpdate to trigger staging
                     fireNextupdate = true;
                     lightsOn();
@@ -257,18 +250,8 @@ namespace KM_Lib
         }
 
         private void updateEditor() {
-            //Adjust group name
-            if (group != lastGroup) {
-                groupName = Utility.KM_dictAGNames[(int)group];
-                lastGroup = group;
-            }
             //Update buttons
             updateButtons();
-            //Prevent negative target altitudes
-            if (meterHeight < 0 || kilometerHeight < 0) {
-                meterHeight = 0;
-                kilometerHeight = 0;
-            }
         }
 
         #endregion
