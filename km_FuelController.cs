@@ -30,7 +30,7 @@ namespace km_Lib
 {
 	public class KM_FuelController : PartModule
 	{
-		[KSPField(isPersistant = true, guiActive = true, guiName = "Flow enabled")]
+		[KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "Flow enabled")]
 		bool flowEnabled = false;
 
 		public override void OnStart(PartModule.StartState state)
@@ -38,7 +38,7 @@ namespace km_Lib
 			this.part.fuelCrossFeed = flowEnabled;
 		}
 
-		[KSPEvent(guiName = "Toggle Crossfeed", guiActive = true)]
+		[KSPEvent(guiName = "Toggle Crossfeed", guiActiveEditor = true ,guiActive = true)]
 		public void toggleCrossfeed()
 		{
 			flowEnabled = !flowEnabled;
@@ -51,30 +51,18 @@ namespace km_Lib
 			toggleCrossfeed ();
 		}
 
-		[KSPEvent(guiName = "Activate Crossfeed", guiActive = true)]
-		public void activateCrossfeed()
-		{
-			flowEnabled = true;
-			this.part.fuelCrossFeed = flowEnabled;
-		}
-
 		[KSPAction("Activate Crossfeed")]
 		public void activateCrossfeedAction(KSPActionParam param)
 		{
-			activateCrossfeed();
-		}
-
-		[KSPEvent(guiName = "Dectivate Crossfeed", guiActive = true)] 
-		public void deactivateCrossfeed()
-		{
-			flowEnabled = false;
-			this.part.fuelCrossFeed = flowEnabled;
+            flowEnabled = true;
+            this.part.fuelCrossFeed = flowEnabled;
 		}
 
 		[KSPAction("Deactivate Crossfeed")]
 		public void deactivateCrossfeedAction(KSPActionParam param)
 		{
-			deactivateCrossfeed();
+            flowEnabled = false;
+            this.part.fuelCrossFeed = flowEnabled;
 		}
 	}
 }
