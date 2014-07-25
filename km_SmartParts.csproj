@@ -25,7 +25,7 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>Release\Klockheed_Martian_SmartParts\Plugins\</OutputPath>
+    <OutputPath>Compiled\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -37,12 +37,15 @@
     </Reference>
     <Reference Include="Assembly-CSharp-firstpass">
       <HintPath>C:\SteamPriority\SteamApps\common\Kerbal Space Program\KSP_Data\Managed\Assembly-CSharp-firstpass.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="km_Lib">
       <HintPath>C:\SteamPriority\SteamApps\common\Kerbal Space Program\GameData\Klockheed_Martian\Plugins\km_Lib.dll</HintPath>
+      <Private>False</Private>
     </Reference>
-    <Reference Include="KSPAPIExtensions, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="KSPAPIExtensions">
       <HintPath>C:\SteamPriority\SteamApps\common\Kerbal Space Program\GameData\Klockheed_Martian_SmartParts\Plugins\KSPAPIExtensions.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="System" />
     <Reference Include="UnityEngine">
@@ -62,10 +65,12 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>del "$(TargetDir)km_SmartParts.pdb"
-del "$(SolutionDir)Binary\Release.zip"
+    <PostBuildEvent>xcopy $(TargetPath) "C:\SteamPriority\SteamApps\common\Kerbal Space Program\GameData\Klockheed_Martian_SmartParts\Plugins" /y
 rd /s /q $(SolutionDir)obj
-"C:\Utilities\WinRar\winrar.exe" a -ep1 -IBCK "$(SolutionDir)Binary\Release.zip" "$(SolutionDir)Release\Klockheed_Martian_SmartParts"</PostBuildEvent>
+del "$(TargetDir)km_SmartParts.pdb"
+del "$(SolutionDir)Release\Release.zip"
+"C:\Utilities\WinRar\winrar.exe" a -ep1 -IBCK -apGameData "$(SolutionDir)Release\Release.zip" "C:\SteamPriority\SteamApps\common\Kerbal Space Program\GameData\Klockheed_Martian_SmartParts"
+"C:\Utilities\WinRar\winrar.exe" a -ep1 -IBCK "$(SolutionDir)Release\Release.zip" "$(SolutionDir)README.txt"</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
