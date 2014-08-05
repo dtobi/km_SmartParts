@@ -100,6 +100,10 @@ namespace KM_Lib
             }
         }
 
+        public override void OnAwake() {
+            PartMessageService.Register(this);
+        }
+
         public override void OnUpdate() {
             if (isActive && observedPart != null && monitoredResource != "Empty") {
                 //Check fuel percantage and compare it to target percentage
@@ -158,13 +162,9 @@ namespace KM_Lib
         }
 
         [PartMessageListener(typeof(PartResourceListChanged), scenes: GameSceneFilter.AnyEditor, relations: PartRelationship.Parent)]
-        private void parentChangeListener() {
-            findObservedPart();
-            updateList();
-        }
-
         [PartMessageListener(typeof(PartResourceListChanged), scenes: GameSceneFilter.AnyEditor, relations: PartRelationship.Self)]
-        private void selfChangeListener() {
+        private void changeListener() {
+            print("KM Stager: Monitored part resoruces changed. Updating.");
             findObservedPart();
             updateList();
         }
