@@ -98,6 +98,12 @@ v0.6 Upgraded GUI, Improved parts, and KSP .24 compatibility
 		* Removed redundant fuel controller ("ON")
 v0.6.1 KSP .24.1 compatibility
 	* KSP .24.1 compatibility
+v0.6.2 KSP .24.2 compatibility
+	* KSP .24.2 compatibility
+v2.0.2 Updated KSPAPIExtension and Real Fuels compatbility
+	* Updated KSPAPIExtension to 1.7.0
+	* Auto stager now fully supports Real Fuels and will auto update on tank resource change
+	* No longer dependant on km_lib.dll
 
 	 
 	 

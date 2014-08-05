@@ -108,7 +108,7 @@ namespace KM_Lib
             if (isActive && observedPart != null && monitoredResource != "Empty") {
                 //Check fuel percantage and compare it to target percentage
                 if (((observedPart.Resources[monitoredResource].amount / observedPart.Resources[monitoredResource].maxAmount) * 100) <= activationPercentage) {
-                    Utility.fireEvent(this.part, int.Parse(group));
+                    km_Helper.fireEvent(this.part, int.Parse(group));
                     print("KM Stager: Target percentage hit");
                     isActive = false;
                 }

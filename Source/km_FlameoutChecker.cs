@@ -68,7 +68,7 @@ namespace KM_Lib
 					flameout = engines[0].getIgnitionState;
 					if (!hasFired && engines[0].getFlameoutState && engines[0].getIgnitionState) {
 						hasFired = true;
-                        Utility.fireEvent (this.part, int.Parse(group));
+                        km_Helper.fireEvent(this.part, int.Parse(group));
 
 
 					} else if (!engines[0].getFlameoutState && engines[0].getIgnitionState) {

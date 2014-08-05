@@ -39,10 +39,6 @@
       <HintPath>C:\SteamPriority\SteamApps\common\Kerbal Space Program\KSP_Data\Managed\Assembly-CSharp-firstpass.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="km_Lib">
-      <HintPath>C:\SteamPriority\SteamApps\common\Kerbal Space Program\GameData\Klockheed_Martian\Plugins\km_Lib.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
     <Reference Include="KSPAPIExtensions">
       <HintPath>C:\SteamPriority\SteamApps\common\Kerbal Space Program\GameData\Klockheed_Martian_SmartParts\Plugins\KSPAPIExtensions.dll</HintPath>
       <Private>False</Private>
@@ -57,6 +53,7 @@
     <Compile Include="Source\km_altimeter.cs" />
     <Compile Include="Source\km_FlameoutChecker.cs" />
     <Compile Include="Source\km_FuelController.cs" />
+    <Compile Include="Source\km_Helper.cs" />
     <Compile Include="Source\km_RadioControl.cs" />
     <Compile Include="Source\km_Stager.cs" />
     <Compile Include="Source\km_Timer.cs" />
@@ -67,6 +64,7 @@
   <PropertyGroup>
     <PostBuildEvent>xcopy $(TargetPath) "C:\SteamPriority\SteamApps\common\Kerbal Space Program\GameData\Klockheed_Martian_SmartParts\Plugins" /y
 rd /s /q $(SolutionDir)obj
+rd /s /q $(SolutionDir)bin
 del "$(TargetDir)km_SmartParts.pdb"
 del "$(SolutionDir)Release\Release.zip"
 "C:\Utilities\WinRar\winrar.exe" a -ep1 -IBCK -apGameData "$(SolutionDir)Release\Release.zip" "C:\SteamPriority\SteamApps\common\Kerbal Space Program\GameData\Klockheed_Martian_SmartParts"

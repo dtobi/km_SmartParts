@@ -265,17 +265,17 @@ namespace KM_Lib
         }
 
         private void indicateSend(){
-            Utility.switchLight (this.part, "light-go", true);             
-            Utility.playAnimationSetToPosition (this.part, "glow", 1);
+            km_Helper.switchLight (this.part, "light-go", true);
+            km_Helper.playAnimationSetToPosition(this.part, "glow", 1);
             fireTime = Time.fixedTime;
             print ("Fire Time:" + fireTime);
         }
 
         private void indicateReceive(bool playSound){
-            Utility.switchLight (this.part, "light-go", true);             
-            Utility.playAnimationSetToPosition (this.part, "glow", 1);
+            km_Helper.switchLight(this.part, "light-go", true);
+            km_Helper.playAnimationSetToPosition(this.part, "glow", 1);
             fireTime = Time.fixedTime;
-            if(playSound)Utility.playAudio(this.part, rcv_sound);
+            if (playSound) km_Helper.playAudio(this.part, rcv_sound);
             print ("Fire Time:" + fireTime);
         }
 
@@ -284,8 +284,8 @@ namespace KM_Lib
                 MonoBehaviour.print ("I am the sender or channels are not equal:" + channel + ", " + transmitChannel);
                 return;
             }
-            print ("Listener:" + vessel.vesselName + "received command" + group);    
-            Utility.fireEvent (this.part, (int)group);
+            print ("Listener:" + vessel.vesselName + "received command" + group);
+            km_Helper.fireEvent(this.part, (int)group);
             indicateReceive (true);
         }
 
@@ -339,8 +339,8 @@ namespace KM_Lib
             updateCounter++;
 
             if (fireTime != 0 && fireTime + lightOnTime <= Time.time) {
-                Utility.switchLight (this.part, "light-go", false);             
-                Utility.playAnimationSetToPosition (this.part, "glow", 0);
+                km_Helper.switchLight(this.part, "light-go", false);
+                km_Helper.playAnimationSetToPosition(this.part, "glow", 0);
             }
 
             //if (fireTime != 0 && fireTime + 10 <= Time.time) {

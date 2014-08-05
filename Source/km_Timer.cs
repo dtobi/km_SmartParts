@@ -163,14 +163,14 @@ namespace KM_Lib
             //If the timer has been activated, start the countdown, activate the model's LED, and change the icon color
             if (triggerTime > 0 && armed) {
                 remainingTime = triggerTime + (useSeconds ? triggerDelaySeconds : triggerDelayMinutes * 60) - Time.time;
-                Utility.switchLight(this.part, "light-go", true);
-                Utility.playAnimationSetToPosition(this.part, "glow", 1);
+                km_Helper.switchLight(this.part, "light-go", true);
+                km_Helper.playAnimationSetToPosition(this.part, "glow", 1);
                 this.part.stackIcon.SetIconColor(XKCDColors.BrightYellow);
 
                 //Once the timer hits 0 activate the stage/AG, disable the model's LED, and change the icon color
                 if (remainingTime < 0) {
-                    print ("Stage:"+Utility.KM_dictAGNames [int.Parse(group)]);
-                    Utility.fireEvent (this.part, int.Parse(group));
+                    print("Stage:" + km_Helper.KM_dictAGNames[int.Parse(group)]);
+                    km_Helper.fireEvent(this.part, int.Parse(group));
                     this.part.stackIcon.SetIconColor(XKCDColors.Red);
                     triggerTime = 0;
                     remainingTime = 0;
@@ -224,8 +224,8 @@ namespace KM_Lib
             triggerTime = 0;
             remainingTime = 0;
             //Switch off model lights
-            Utility.switchLight(this.part, "light-go", false);
-            Utility.playAnimationSetToPosition(this.part, "glow", 0);
+            km_Helper.switchLight(this.part, "light-go", false);
+            km_Helper.playAnimationSetToPosition(this.part, "glow", 0);
             //Reset icon color to white
             this.part.stackIcon.SetIconColor(XKCDColors.White);
             //Reset armed variable

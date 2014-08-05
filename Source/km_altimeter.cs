@@ -128,7 +128,7 @@ namespace KM_Lib
             }
             //In order for physics to take effect on jettisoned parts, the staging event has to be fired from OnUpdate
             if (fireNextupdate) {
-                Utility.fireEvent(this.part, int.Parse(group));
+                km_Helper.fireEvent(this.part, int.Parse(group));
                 fireNextupdate = false;
             }
         }
@@ -189,15 +189,15 @@ namespace KM_Lib
 
         private void lightsOn() {
             //Switch off model lights
-            Utility.switchLight(this.part, "light-go", true);
-            Utility.playAnimationSetToPosition(this.part, "glow", 1);
+            km_Helper.switchLight(this.part, "light-go", true);
+            km_Helper.playAnimationSetToPosition(this.part, "glow", 1);
             illuminated = true;
         }
 
         private void lightsOff() {
             //Switch off model lights
-            Utility.switchLight(this.part, "light-go", false);
-            Utility.playAnimationSetToPosition(this.part, "glow", 0);
+            km_Helper.switchLight(this.part, "light-go", false);
+            km_Helper.playAnimationSetToPosition(this.part, "glow", 0);
             illuminated = false;
         }
 
