@@ -33,83 +33,125 @@ namespace KM_Lib
     {
         #region Fields
 
-        [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "Group"),
-            UI_ChooseOption(
-                options = new String[] { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15" },
-                display = new String[] { "Stage", "AG1", "AG2", "AG3", "AG4", "AG5", "AG6", "AG7", "AG8", "AG9", "AG10", "Lights", "RCS", "SAS", "Brakes", "Abort" }
-            )]
+        [KSPField (isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "Group"),
+            UI_ChooseOption (
+            options = new String[] {
+                "0",
+                "1",
+                "2",
+                "3",
+                "4",
+                "5",
+                "6",
+                "7",
+                "8",
+                "9",
+                "10",
+                "11",
+                "12",
+                "13",
+                "14",
+                "15"
+            },
+            display = new String[] {
+                "Stage",
+                "AG1",
+                "AG2",
+                "AG3",
+                "AG4",
+                "AG5",
+                "AG6",
+                "AG7",
+                "AG8",
+                "AG9",
+                "AG10",
+                "Lights",
+                "RCS",
+                "SAS",
+                "Brakes",
+                "Abort"
+            }
+        )]
         public string group = "0";
 
         // remember the time wehen the countdown was started
-        [KSPField(isPersistant = true, guiActive = false)]
+        [KSPField (isPersistant = true, guiActive = false)]
         private double triggerTime = 0;
 
         // Delay in seconds. Used for precise measurement
-        [KSPField(isPersistant = true, guiActiveEditor = false, guiActive = false, guiName = "Seconds", guiFormat = "F2", guiUnits = "sec"),
-            UI_FloatEdit(scene = UI_Scene.All, minValue = 0f, maxValue = 120f, incrementLarge = 20f, incrementSmall = 1f, incrementSlide = .05f)]
+        [KSPField (isPersistant = true, guiActiveEditor = false, guiActive = false, guiName = "Seconds", guiFormat = "F2", guiUnits = "sec"),
+            UI_FloatEdit (scene = UI_Scene.All, minValue = 0f, maxValue = 120f, incrementLarge = 20f, incrementSmall = 1f, incrementSlide = .05f)]
         public float triggerDelaySeconds = 0;
 
         // Delay in minutes. Used for longer term measurement
-        [KSPField(isPersistant = true, guiActiveEditor = false, guiActive = false, guiName = "Minutes", guiFormat = "F2", guiUnits = "min"),
-            UI_FloatEdit(scene = UI_Scene.All, minValue = 0f, maxValue = 360f, incrementLarge = 60f, incrementSmall = 5f, incrementSlide = .25f)]
+        [KSPField (isPersistant = true, guiActiveEditor = false, guiActive = false, guiName = "Minutes", guiFormat = "F2", guiUnits = "min"),
+            UI_FloatEdit (scene = UI_Scene.All, minValue = 0f, maxValue = 360f, incrementLarge = 60f, incrementSmall = 5f, incrementSlide = .25f)]
         public float triggerDelayMinutes = 0;
 
-        [KSPField(isPersistant = true, guiActive = true, guiName = "Remaining Time", guiFormat = "F2")]
+        [KSPField (isPersistant = true, guiActive = true, guiName = "Remaining Time", guiFormat = "F2")]
         private double remainingTime = 0;
 
-        [KSPField(isPersistant = true)]
+        [KSPField (isPersistant = true)]
         private Boolean allowStage = true;
 
-        [KSPField(isPersistant = true)]
+        [KSPField (isPersistant = true)]
         private Boolean useSeconds = true;
 
         #endregion
-        
+
 
         #region Events
 
-        [KSPEvent(guiActive = false, guiActiveEditor = false, guiName = "Use Seconds")]
-        public void setSeconds() {
+        [KSPEvent (guiActive = false, guiActiveEditor = false, guiName = "Use Seconds")]
+        public void setSeconds ()
+        {
             useSeconds = true;
-            updateButtons();
+            updateButtons ();
         }
 
-        [KSPEvent(guiActive = false, guiActiveEditor = false, guiName = "Use Minutes")]
-        public void setMinutes() {
+        [KSPEvent (guiActive = false, guiActiveEditor = false, guiName = "Use Minutes")]
+        public void setMinutes ()
+        {
             useSeconds = false;
-            updateButtons();
+            updateButtons ();
         }
 
-        [KSPEvent(guiActive = false, guiActiveEditor = false, guiName = "Enable Staging")]
-        public void activateStaging() {
-           enableStaging();
+        [KSPEvent (guiActive = false, guiActiveEditor = false, guiName = "Enable Staging")]
+        public void activateStaging ()
+        {
+            enableStaging ();
         }
 
-        [KSPEvent(guiActive = false, guiActiveEditor = false, guiName = "Disable Staging")]
-        public void deactivateStaging() {
-            disableStaging();
+        [KSPEvent (guiActive = false, guiActiveEditor = false, guiName = "Disable Staging")]
+        public void deactivateStaging ()
+        {
+            disableStaging ();
         }
 
-        [KSPEvent(guiName = "Start Countdown", guiActive = true)]
-        public void activateTimer () {
-            reset();
-            setTimer();
+        [KSPEvent (guiName = "Start Countdown", guiActive = true)]
+        public void activateTimer ()
+        {
+            reset ();
+            setTimer ();
         }
 
-        [KSPAction("Start Countdown")]
-        public void activateTimerAG(KSPActionParam param) {
-            reset();
-            setTimer();
+        [KSPAction ("Start Countdown")]
+        public void activateTimerAG (KSPActionParam param)
+        {
+            reset ();
+            setTimer ();
         }
 
-        [KSPEvent(guiName = "Reset", guiActive = true)]
-        public void resetTimer () {
-            reset();
+        [KSPEvent (guiName = "Reset", guiActive = true)]
+        public void resetTimer ()
+        {
+            reset ();
         }
 
-        [KSPAction("Reset")]
-        public void resetTimerAG(KSPActionParam param) {
-            reset();
+        [KSPAction ("Reset")]
+        public void resetTimerAG (KSPActionParam param)
+        {
+            reset ();
         }
 
         #endregion
@@ -125,53 +167,54 @@ namespace KM_Lib
 
         #region Overrides
 
-        public override void OnStart(StartState state) {
+        public override void OnStart (StartState state)
+        {
             if (state == StartState.Editor) {
                 this.part.OnEditorAttach += OnEditorAttach;
                 this.part.OnEditorDetach += OnEditorDetach;
                 this.part.OnEditorDestroy += OnEditorDestroy;
-                OnEditorAttach();
+                OnEditorAttach ();
             }
             if (allowStage) {
-                Events["activateStaging"].guiActiveEditor = false;
-                Events["deactivateStaging"].guiActiveEditor = true;
+                Events ["activateStaging"].guiActiveEditor = false;
+                Events ["deactivateStaging"].guiActiveEditor = true;
+            } else {
+                Invoke ("disableStaging", 0.25f);
             }
-            else {
-                Invoke("disableStaging", 0.25f);
-            }
-            GameEvents.onVesselChange.Add(onVesselChange);
+            GameEvents.onVesselChange.Add (onVesselChange);
             part.ActivatesEvenIfDisconnected = true;
             //Initial button layout
-            updateButtons();
+            updateButtons ();
         }
 
-        public override void OnActive() {            
+        public override void OnActive ()
+        {            
             //If staging enabled, set timer
-            if(allowStage) {
-                setTimer();
+            if (allowStage) {
+                setTimer ();
             }
         }
 
-        public override void OnUpdate()
+        public override void OnUpdate ()
         {
             //Check to see if the timer has been dragged in the staging list. If so, reset icon color
             if (this.part.inverseStage != previousStage && allowStage && !armed && this.part.inverseStage < Staging.CurrentStage) {
-                reset();
+                reset ();
             }
             previousStage = this.part.inverseStage;
 
             //If the timer has been activated, start the countdown, activate the model's LED, and change the icon color
             if (triggerTime > 0 && armed) {
                 remainingTime = triggerTime + (useSeconds ? triggerDelaySeconds : triggerDelayMinutes * 60) - Time.time;
-                km_Helper.switchLight(this.part, "light-go", true);
-                km_Helper.playAnimationSetToPosition(this.part, "glow", 1);
-                this.part.stackIcon.SetIconColor(XKCDColors.BrightYellow);
+                Utility.switchLight (this.part, "light-go", true);
+                Utility.playAnimationSetToPosition (this.part, "glow", 1);
+                this.part.stackIcon.SetIconColor (XKCDColors.BrightYellow);
 
                 //Once the timer hits 0 activate the stage/AG, disable the model's LED, and change the icon color
                 if (remainingTime < 0) {
-                    print("Stage:" + km_Helper.KM_dictAGNames[int.Parse(group)]);
-                    km_Helper.fireEvent(this.part, int.Parse(group));
-                    this.part.stackIcon.SetIconColor(XKCDColors.Red);
+                    print ("Stage:" + km_Helper.KM_dictAGNames [int.Parse (group)]);
+                    km_Helper.fireEvent (this.part, int.Parse (group));
+                    this.part.stackIcon.SetIconColor (XKCDColors.Red);
                     triggerTime = 0;
                     remainingTime = 0;
                     //Disable timer until reset
@@ -185,103 +228,112 @@ namespace KM_Lib
 
         #region Methods
 
-        public void onVesselChange(Vessel newVessel) {
+        public void onVesselChange (Vessel newVessel)
+        {
             if (newVessel == this.vessel && !allowStage) {
-                Invoke("disableStaging", 0.25f);
+                Invoke ("disableStaging", 0.25f);
             }
         }
 
-        private void enableStaging() {
-                part.stackIcon.CreateIcon();
-                Staging.SortIcons();
-                allowStage = true;
+        private void enableStaging ()
+        {
+            part.stackIcon.CreateIcon ();
+            Staging.SortIcons ();
+            allowStage = true;
 
-                //Toggle button visibility so currently inactive mode's button is visible
-                Events["activateStaging"].guiActiveEditor = false;
-                Events["deactivateStaging"].guiActiveEditor = true;
+            //Toggle button visibility so currently inactive mode's button is visible
+            Events ["activateStaging"].guiActiveEditor = false;
+            Events ["deactivateStaging"].guiActiveEditor = true;
         }
 
-        private void disableStaging() {
-                part.stackIcon.RemoveIcon();
-                Staging.SortIcons();
-                allowStage = false;
+        private void disableStaging ()
+        {
+            part.stackIcon.RemoveIcon ();
+            Staging.SortIcons ();
+            allowStage = false;
 
-                //Toggle button visibility so currently inactive mode's button is visible
-                Events["activateStaging"].guiActiveEditor = true;
-                Events["deactivateStaging"].guiActiveEditor = false;
+            //Toggle button visibility so currently inactive mode's button is visible
+            Events ["activateStaging"].guiActiveEditor = true;
+            Events ["deactivateStaging"].guiActiveEditor = false;
         }
 
-        private void setTimer() {
+        private void setTimer ()
+        {
             if (armed) {
                 //Set the trigger time, which will be caught in OnUpdate
                 triggerTime = Time.fixedTime;
-                print("Activating Timer: " + (useSeconds ? triggerDelaySeconds : triggerDelayMinutes * 60));
-                }
+                print ("Activating Timer: " + (useSeconds ? triggerDelaySeconds : triggerDelayMinutes * 60));
+            }
         }
 
-        private void reset() {
+        private void reset ()
+        {
             //Reset trigger and remaining time to 0
             triggerTime = 0;
             remainingTime = 0;
             //Switch off model lights
-            km_Helper.switchLight(this.part, "light-go", false);
-            km_Helper.playAnimationSetToPosition(this.part, "glow", 0);
+            Utility.switchLight (this.part, "light-go", false);
+            Utility.playAnimationSetToPosition (this.part, "glow", 0);
             //Reset icon color to white
-            this.part.stackIcon.SetIconColor(XKCDColors.White);
+            this.part.stackIcon.SetIconColor (XKCDColors.White);
             //Reset armed variable
             armed = true;
         }
 
-         private void updateButtons() {
+        private void updateButtons ()
+        {
             if (useSeconds) {
                 //Show minute button
-                Events["setMinutes"].guiActiveEditor = true;
-                Events["setMinutes"].guiActive = true;
+                Events ["setMinutes"].guiActiveEditor = true;
+                Events ["setMinutes"].guiActive = true;
                 //Hide minute scale
-                Fields["triggerDelayMinutes"].guiActiveEditor = false;
-                Fields["triggerDelayMinutes"].guiActive = false;
+                Fields ["triggerDelayMinutes"].guiActiveEditor = false;
+                Fields ["triggerDelayMinutes"].guiActive = false;
                 //Hide seconds button
-                Events["setSeconds"].guiActiveEditor = false;
-                Events["setSeconds"].guiActive = false;
+                Events ["setSeconds"].guiActiveEditor = false;
+                Events ["setSeconds"].guiActive = false;
                 //Show seconds scale
-                Fields["triggerDelaySeconds"].guiActiveEditor = true;
-                Fields["triggerDelaySeconds"].guiActive = true;
+                Fields ["triggerDelaySeconds"].guiActiveEditor = true;
+                Fields ["triggerDelaySeconds"].guiActive = true;
                 //Reset minute scale
                 triggerDelayMinutes = 0f;
-            }
-            else {
+            } else {
                 //Hide minute button
-                Events["setMinutes"].guiActiveEditor = false;
-                Events["setMinutes"].guiActive = false;
+                Events ["setMinutes"].guiActiveEditor = false;
+                Events ["setMinutes"].guiActive = false;
                 //Show minute scale
-                Fields["triggerDelayMinutes"].guiActiveEditor = true;
-                Fields["triggerDelayMinutes"].guiActive = true;
+                Fields ["triggerDelayMinutes"].guiActiveEditor = true;
+                Fields ["triggerDelayMinutes"].guiActive = true;
                 //Show seconds button
-                Events["setSeconds"].guiActiveEditor = true;
-                Events["setSeconds"].guiActive = true;
+                Events ["setSeconds"].guiActiveEditor = true;
+                Events ["setSeconds"].guiActive = true;
                 //Hide seconds scale
-                Fields["triggerDelaySeconds"].guiActiveEditor = false;
-                Fields["triggerDelaySeconds"].guiActive = false;
+                Fields ["triggerDelaySeconds"].guiActiveEditor = false;
+                Fields ["triggerDelaySeconds"].guiActive = false;
                 //Reset seconds scale
                 triggerDelaySeconds = 0;
             }
-         }
-
-        private void OnEditorAttach() {
-            RenderingManager.AddToPostDrawQueue(99, updateEditor);
         }
 
-        private void OnEditorDetach() {            
-            RenderingManager.RemoveFromPostDrawQueue(99, updateEditor);
+        private void OnEditorAttach ()
+        {
+            RenderingManager.AddToPostDrawQueue (99, updateEditor);
         }
 
-        private void OnEditorDestroy() {
-            RenderingManager.RemoveFromPostDrawQueue(99, updateEditor);
+        private void OnEditorDetach ()
+        {            
+            RenderingManager.RemoveFromPostDrawQueue (99, updateEditor);
         }
 
-        private void updateEditor() {
+        private void OnEditorDestroy ()
+        {
+            RenderingManager.RemoveFromPostDrawQueue (99, updateEditor);
+        }
+
+        private void updateEditor ()
+        {
             //Update Buttons
-            updateButtons();
+            updateButtons ();
         }
 
         #endregion
