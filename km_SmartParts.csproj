@@ -14,6 +14,7 @@
     <TargetFrameworkProfile />
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
+    <ReleaseVersion>0.2</ReleaseVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -25,7 +26,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>Compiled\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
@@ -73,4 +73,27 @@ del "$(SolutionDir)Release\Release.zip"
   <Target Name="AfterBuild">
   </Target>
   -->
+  <ItemGroup>
+    <Folder Include="Release\" />
+    <Folder Include="GameData\" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Release\Release.zip" />
+    <None Include="GameData\Klockheed_Martian_SmartParts\Parts\Flameout-Detector\F2.cfg" />
+    <None Include="GameData\Klockheed_Martian_SmartParts\Parts\Fuel-Breakers\B1.cfg" />
+    <None Include="GameData\Klockheed_Martian_SmartParts\Parts\Fuel-Breakers\B2.cfg" />
+    <None Include="GameData\Klockheed_Martian_SmartParts\Parts\Fuel-Breakers\B3.cfg" />
+    <None Include="GameData\Klockheed_Martian_SmartParts\Parts\Fuel-Breakers\B4.cfg" />
+    <None Include="GameData\Klockheed_Martian_SmartParts\Parts\Fuel-Controller\km_fuel_controller.cfg" />
+    <None Include="GameData\Klockheed_Martian_SmartParts\Parts\Smart-Controller\km_smart_altimeter.cfg" />
+    <None Include="GameData\Klockheed_Martian_SmartParts\Parts\Smart-Controller\km_smart_fuel.cfg" />
+    <None Include="GameData\Klockheed_Martian_SmartParts\Parts\Smart-Controller\km_smart_radio.cfg" />
+    <None Include="GameData\Klockheed_Martian_SmartParts\Parts\Smart-Controller\km_smart_time.cfg" />
+    <None Include="GameData\Klockheed_Martian_SmartParts\Parts\Valve\km_valve.cfg" />
+    <None Include="GameData\Klockheed_Martian_SmartParts\Parts\Valve\km_valve2.cfg" />
+    <None Include="km_SmartParts.csproj" />
+    <None Include="km_SmartParts.sln" />
+    <None Include="LICENSE.txt" />
+    <None Include="README.txt" />
+  </ItemGroup>
 </Project>
