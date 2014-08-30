@@ -29,8 +29,8 @@ using KSPAPIExtensions;
 
 namespace KM_Lib
 {
-	public class KM_Flameout_Checker : PartModule
-	{
+    public class KM_Flameout_Checker : PartModule
+    {
 
         [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "Group"),
             UI_ChooseOption(
@@ -40,18 +40,16 @@ namespace KM_Lib
         public string group = "0";
 
         [KSPField(isPersistant = false, guiActive = true, guiName = "Flameout:")]
-		private bool flameout = false;
+        private bool flameout = false;
 
-		[KSPField(isPersistant = false, guiActive = true, guiName = "Ignition:")]
-		private bool ignition = false;
+        [KSPField(isPersistant = false, guiActive = true, guiName = "Ignition:")]
+        private bool ignition = false;
 
-		[KSPField(isPersistant = false, guiActive = true, guiName = "Has fired:")]
-		private bool hasFired = false;
+        [KSPField(isPersistant = false, guiActive = true, guiName = "Has fired:")]
+        private bool hasFired = false;
 
-        public override void OnStart(StartState state)
-        {
-            if (state == StartState.Editor)
-            {
+        public override void OnStart(StartState state) {
+            if (state == StartState.Editor) {
                 this.part.OnEditorAttach += OnEditorAttach;
                 this.part.OnEditorDetach += OnEditorDetach;
                 this.part.OnEditorDestroy += OnEditorDestroy;
@@ -59,46 +57,43 @@ namespace KM_Lib
             }
         }
 
-		public override void OnUpdate(){
-			foreach (Part child in this.part.children)
-			{
-				ModuleEngines[] engines = child.GetComponents<ModuleEngines>();
-                if(engines != null && engines.Count() > 0) {
-					ignition = engines[0].getFlameoutState;
-					flameout = engines[0].getIgnitionState;
-					if (!hasFired && engines[0].getFlameoutState && engines[0].getIgnitionState) {
-						hasFired = true;
+        public override void OnUpdate() {
+            foreach (Part child in this.part.children) {
+                ModuleEngines[] engines = child.GetComponents<ModuleEngines>();
+                if (engines != null && engines.Count() > 0) {
+                    ignition = engines[0].getFlameoutState;
+                    flameout = engines[0].getIgnitionState;
+                    if (!hasFired && engines[0].getFlameoutState && engines[0].getIgnitionState) {
+                        hasFired = true;
                         km_Helper.fireEvent(this.part, int.Parse(group));
 
 
-					} else if (!engines[0].getFlameoutState && engines[0].getIgnitionState) {
-						// the engine is running again. Reactivate the action group.
-						hasFired = false;
-					}
-				}
-			}
-		}
-        private void OnEditorAttach()
-        {
+                    }
+                    else if (!engines[0].getFlameoutState && engines[0].getIgnitionState) {
+                        // the engine is running again. Reactivate the action group.
+                        hasFired = false;
+                    }
+                }
+            }
+        }
+        private void OnEditorAttach() {
             RenderingManager.AddToPostDrawQueue(99, updateEditor);
         }
 
-        private void OnEditorDetach()
-        {
+        private void OnEditorDetach() {
 
             RenderingManager.RemoveFromPostDrawQueue(99, updateEditor);
         }
 
-        private void OnEditorDestroy()
-        {
+        private void OnEditorDestroy() {
             RenderingManager.RemoveFromPostDrawQueue(99, updateEditor);
 
         }
 
-        private void updateEditor(){
+        private void updateEditor() {
 
         }
 
-	} 
+    }
 }
 

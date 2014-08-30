@@ -28,42 +28,37 @@ using KSP.IO;
 
 namespace km_Lib
 {
-	public class KM_FuelController : PartModule
-	{
-		[KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "Flow enabled")]
-		bool flowEnabled = false;
+    public class KM_FuelController : PartModule
+    {
+        [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "Flow enabled")]
+        bool flowEnabled = false;
 
-		public override void OnStart(PartModule.StartState state)
-		{
-			this.part.fuelCrossFeed = flowEnabled;
-		}
+        public override void OnStart(PartModule.StartState state) {
+            this.part.fuelCrossFeed = flowEnabled;
+        }
 
-		[KSPEvent(guiName = "Toggle Crossfeed", guiActiveEditor = true ,guiActive = true)]
-		public void toggleCrossfeed()
-		{
-			flowEnabled = !flowEnabled;
-			this.part.fuelCrossFeed = flowEnabled;
-		}
+        [KSPEvent(guiName = "Toggle Crossfeed", guiActiveEditor = true, guiActive = true)]
+        public void toggleCrossfeed() {
+            flowEnabled = !flowEnabled;
+            this.part.fuelCrossFeed = flowEnabled;
+        }
 
-		[KSPAction("Toggle Crossfeed")]
-		public void toggleCrossfeedAction(KSPActionParam param)
-		{
-			toggleCrossfeed ();
-		}
+        [KSPAction("Toggle Crossfeed")]
+        public void toggleCrossfeedAction(KSPActionParam param) {
+            toggleCrossfeed();
+        }
 
-		[KSPAction("Activate Crossfeed")]
-		public void activateCrossfeedAction(KSPActionParam param)
-		{
+        [KSPAction("Activate Crossfeed")]
+        public void activateCrossfeedAction(KSPActionParam param) {
             flowEnabled = true;
             this.part.fuelCrossFeed = flowEnabled;
-		}
+        }
 
-		[KSPAction("Deactivate Crossfeed")]
-		public void deactivateCrossfeedAction(KSPActionParam param)
-		{
+        [KSPAction("Deactivate Crossfeed")]
+        public void deactivateCrossfeedAction(KSPActionParam param) {
             flowEnabled = false;
             this.part.fuelCrossFeed = flowEnabled;
-		}
-	}
+        }
+    }
 }
 

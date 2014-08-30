@@ -94,7 +94,7 @@ namespace KM_Lib
                 resourceFlightDisplay = monitoredResource;
             }
             //Find which part we should be monitoring, and update the fuel list in the editor
-            if(HighLogic.LoadedSceneIsEditor && this.part.parent != null) {
+            if (HighLogic.LoadedSceneIsEditor && this.part.parent != null) {
                 findObservedPart();
                 updateList();
             }

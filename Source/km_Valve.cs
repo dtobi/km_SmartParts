@@ -31,7 +31,7 @@ namespace KM_Lib
     {
         #region Fields/Variables
 
-        private Dictionary<String, double> drainRatio = new Dictionary<String, double> ();
+        private Dictionary<String, double> drainRatio = new Dictionary<String, double>();
 
         static float maxSpeedY = -1.0f;
         KSPParticleEmitter valveEffect = null;
@@ -42,7 +42,7 @@ namespace KM_Lib
         [KSPField(isPersistant = true)]
         private Boolean allowStage = true;
 
-        [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "Outlet") , UI_FloatRange(minValue = 0f, maxValue = 100f, stepIncrement = 5f)]
+        [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "Outlet"), UI_FloatRange(minValue = 0f, maxValue = 100f, stepIncrement = 5f)]
         public float force = 10;
 
         [KSPField(isPersistant = false)]
@@ -89,7 +89,7 @@ namespace KM_Lib
         #region Overrides
 
         public override void OnStart(StartState state) {
-            valveEffect = (KSPParticleEmitter )this.part.GetComponentInChildren <KSPParticleEmitter > ();
+            valveEffect = (KSPParticleEmitter)this.part.GetComponentInChildren<KSPParticleEmitter>();
 
             if (allowStage) {
                 Events["activateStaging"].guiActiveEditor = false;
@@ -100,11 +100,12 @@ namespace KM_Lib
             }
             GameEvents.onVesselChange.Add(onVesselChange);
 
-            if (valveEffect  != null) {
+            if (valveEffect != null) {
                 valveEffect.emit = isOpen;
-                valveEffect.localVelocity.y = maxSpeedY * force / 100;    
-            } else {
-                print ("Launch effect not found");
+                valveEffect.localVelocity.y = maxSpeedY * force / 100;
+            }
+            else {
+                print("Launch effect not found");
             }
 
             if (state != StartState.Editor) {
@@ -121,7 +122,7 @@ namespace KM_Lib
                     if (resource.resourceName == "ElectricCharge")
                         continue;
                     drainRatio.Add(resource.resourceName, (totalResourceAmount > 0 ? resource.maxAmount / totalResourceAmount : 0));
-                    print ("Valve: Adding ressource:" + resource.resourceName + " DR:" + resource.maxAmount / totalResourceAmount);
+                    print("Valve: Adding ressource:" + resource.resourceName + " DR:" + resource.maxAmount / totalResourceAmount);
                 }
             }
         }
@@ -133,14 +134,14 @@ namespace KM_Lib
                 //Flow rate * number of resources vented * current time step * thrust coefficient (assuming ISP of ~65 and 5 kg per unit of fuel)
                 float appliedForce = force * part.parent.Resources.Count * timeStep * .65f;
                 valveEffect.localVelocity.y = maxSpeedY * force / 100;
-                this.rigidbody.AddRelativeForce((facing==0 ? Vector3.up : Vector3.forward) * appliedForce * 1);
+                this.rigidbody.AddRelativeForce((facing == 0 ? Vector3.up : Vector3.forward) * appliedForce * 1);
                 foreach (PartResource resource in part.parent.Resources) {
                     if (resource.resourceName == "ElectricCharge")
                         continue;
-                    receivedRessource += this.part.RequestResource(resource.resourceName, force*timeStep*drainRatio[resource.resourceName]);
+                    receivedRessource += this.part.RequestResource(resource.resourceName, force * timeStep * drainRatio[resource.resourceName]);
                 }
                 if (receivedRessource == 0)
-                    setValve (false);
+                    setValve(false);
             }
         }
 
